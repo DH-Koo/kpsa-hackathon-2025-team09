@@ -144,7 +144,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(32),
             child: Image.asset(
-              'assets/image/chatbot.png',
+              'assets/images/chatbot.png',
               width: 48,
               height: 48,
               fit: BoxFit.cover,

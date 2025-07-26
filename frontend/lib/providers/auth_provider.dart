@@ -41,25 +41,41 @@ class AuthProvider extends ChangeNotifier {
     String password, {
     bool rememberMe = false,
   }) async {
+    // 디버깅: 로그인 시작
+    print('[AuthProvider] 로그인 시작: email=$email, rememberMe=$rememberMe');
+    
     _setLoading(true);
     _clearError();
 
     try {
+      // 디버깅: AuthService.login 호출
+      print('[AuthProvider] AuthService.login 호출');
       final result = await _authService.login(email, password);
+      
+      // 디버깅: 로그인 결과 출력
+      print('[AuthProvider] 로그인 결과: $result');
 
       // success 키가 있으면 그것을 사용하고, 없으면 사용자 정보가 있으면 성공으로 처리
       final isSuccess = result['success'] == true || result['id'] != null;
+      
+      // 디버깅: 성공 여부 확인
+      print('[AuthProvider] 로그인 성공 여부: $isSuccess');
 
       if (isSuccess) {
         // user 키가 있으면 user 객체를 사용, 없으면 result 자체를 사용자 정보로 사용
         final userData = result['user'] ?? result;
         _currentUser = User.fromJson(userData);
+        
+        // 디버깅: 사용자 정보 설정
+        print('[AuthProvider] 사용자 정보 설정: ${_currentUser?.toJson()}');
 
         // 자동 로그인 설정
         if (rememberMe) {
+          print('[AuthProvider] 자동 로그인 활성화 및 자격 증명 저장');
           await setAutoLoginEnabled(true);
           await saveLoginCredentials(email, password);
         } else {
+          print('[AuthProvider] 자동 로그인 비활성화 및 자격 증명 삭제');
           await setAutoLoginEnabled(false);
           await clearSavedCredentials();
         }
@@ -73,22 +89,27 @@ class AuthProvider extends ChangeNotifier {
         // await _loadChatData();
 
         notifyListeners();
+        print('[AuthProvider] 로그인 성공 완료');
         return true;
       } else {
         _error = result['message'] ?? '로그인에 실패했습니다.';
+        print('[AuthProvider] 로그인 실패: $_error');
         notifyListeners();
         return false;
       }
     } on ApiException catch (e) {
       _error = e.message;
+      print('[AuthProvider] ApiException 발생: $_error');
       notifyListeners();
       return false;
     } catch (e) {
       _error = '로그인 중 오류가 발생했습니다: $e';
+      print('[AuthProvider] 일반 예외 발생: $_error');
       notifyListeners();
       return false;
     } finally {
       _setLoading(false);
+      print('[AuthProvider] 로그인 프로세스 완료');
     }
   }
 

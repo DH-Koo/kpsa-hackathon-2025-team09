@@ -4,6 +4,7 @@ import '../../providers/chat_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/chat_message.dart';
 import 'dart:convert'; // Added for json.decode
+import 'emotion_report_screen.dart';
 
 class EmotionWorkFlowScreen extends StatefulWidget {
   const EmotionWorkFlowScreen({super.key});
@@ -199,6 +200,21 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
       if (message.startsWith('{') && message.endsWith('}')) {
         final Map<String, dynamic> responseData = json.decode(message);
         final response = responseData['response'];
+        final isFinalAnswer = responseData['is_final_answer'] ?? false;
+
+        // is_final_answer가 true인 경우 EmotionReportScreen으로 이동
+        if (isFinalAnswer) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => EmotionReportScreen(
+                  finalResponse: response is List ? response[0] : response.toString(),
+                ),
+              ),
+            );
+          });
+          return [];
+        }
 
         // response가 리스트인 경우
         if (response is List) {
