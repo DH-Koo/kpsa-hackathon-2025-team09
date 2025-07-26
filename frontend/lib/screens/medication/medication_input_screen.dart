@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:provider/provider.dart';
+import '../../models/medication.dart';
+import '../../providers/medication_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class MedicationInputScreen extends StatefulWidget {
   const MedicationInputScreen({super.key});
@@ -19,6 +23,10 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
   // 복용 시작일과 종료일 변수 추가
   DateTime _startDate = DateTime.now();
   DateTime? _endDate;
+
+  // 복용 시간 관련 변수 추가
+  List<List<int>> _selectedTimes = []; // [[9,0], [21,0]] 형태
+  final List<String> _weekDays = ['월', '화', '수', '목', '금', '토', '일'];
 
   void _showCalendarBottomSheet({required bool isStartDate}) async {
     DateTime? picked = await showModalBottomSheet<DateTime>(
@@ -268,18 +276,60 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
     }
   }
 
+  // 시간 선택 다이얼로그
+  void _showTimePickerDialog() async {
+    TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Color(0xFF232329),
+              hourMinuteTextColor: Colors.white,
+              hourMinuteColor: Colors.grey[800],
+              dialHandColor: Color.fromARGB(255, 152, 205, 91),
+              dialBackgroundColor: Colors.grey[800],
+              dialTextColor: Colors.white,
+              entryModeIconColor: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedTimes.add([picked.hour, picked.minute]);
+        // 시간 순서대로 정렬
+        _selectedTimes.sort((a, b) {
+          if (a[0] != b[0]) return a[0].compareTo(b[0]);
+          return a[1].compareTo(b[1]);
+        });
+      });
+    }
+  }
+
+  // 시간 삭제
+  void _removeTime(int index) {
+    setState(() {
+      _selectedTimes.removeAt(index);
+    });
+  }
+
   // 날짜 포맷팅 함수
   String _formatDate(DateTime date) {
     return '${date.year}년 ${date.month.toString().padLeft(2, '0')}월 ${date.day.toString().padLeft(2, '0')}일';
   }
 
-  // 복용 요일 드롭다운 관련 변수 및 위젯 추가
-  String _selectedDayOption = '매일';
-  final List<String> _dayOptions = ['매일', '특정 요일에만'];
+  // 시간 포맷팅 함수
+  String _formatTime(List<int> time) {
+    return '${time[0].toString().padLeft(2, '0')}:${time[1].toString().padLeft(2, '0')}';
+  }
 
   // 요일 선택 관련 변수 추가
   final Set<int> _selectedDays = <int>{};
-  final List<String> _weekDays = ['월', '화', '수', '목', '금', '토', '일'];
 
   @override
   void dispose() {
@@ -333,6 +383,8 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
                       '숫자로 입력해 주세요',
                       _medicationAmountController,
                     ),
+                    const SizedBox(height: 24),
+                    _buildTimeSelectionSection(),
                     const SizedBox(height: 24),
                     _buildWeekDaySelector(),
                     const SizedBox(height: 24),
@@ -398,6 +450,98 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildTimeSelectionSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              '복용 시간',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: _showTimePickerDialog,
+              icon: const Icon(
+                Icons.add,
+                color: Color.fromARGB(255, 152, 205, 91),
+                size: 20,
+              ),
+              label: const Text(
+                '시간 추가',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 152, 205, 91),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (_selectedTimes.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '복용 시간을 추가해주세요',
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+            ),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _selectedTimes.asMap().entries.map((entry) {
+              final index = entry.key;
+              final time = entry.value;
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 152, 205, 91),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _formatTime(time),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () => _removeTime(index),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
       ],
     );
   }
@@ -558,7 +702,7 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
         ),
         const SizedBox(height: 12),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(7, (index) {
             final isSelected = _selectedDays.contains(index);
             return GestureDetector(
@@ -572,13 +716,13 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
                 });
               },
               child: Container(
-                width: 45,
-                height: 45,
+                width: 35,
+                height: 35,
                 decoration: BoxDecoration(
                   color: isSelected
                       ? Color.fromARGB(255, 152, 205, 91)
                       : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Center(
                   child: Text(
@@ -603,12 +747,11 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       child: ElevatedButton(
-        onPressed: () {
-          // 다음 단계로 이동하는 로직 구현
-          Navigator.of(context).pop();
-        },
+        onPressed: _isFormValid() ? _submitForm : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color.fromARGB(255, 152, 205, 91),
+          backgroundColor: _isFormValid()
+              ? Color.fromARGB(255, 152, 205, 91)
+              : Colors.grey.shade600,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
@@ -617,10 +760,70 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
           elevation: 0,
         ),
         child: const Text(
-          '완료 ',
+          '완료',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
+  }
+
+  bool _isFormValid() {
+    return _medicationNameController.text.isNotEmpty &&
+        _medicationAmountController.text.isNotEmpty &&
+        _selectedTimes.isNotEmpty &&
+        _selectedDays.isNotEmpty &&
+        _endDate != null;
+  }
+
+  void _submitForm() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final medicationProvider = Provider.of<MedicationProvider>(
+        context,
+        listen: false,
+      );
+
+      if (authProvider.currentUser == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
+        return;
+      }
+
+      // 선택된 요일을 문자열로 변환
+      final selectedWeekdays = _selectedDays
+          .map((index) => _weekDays[index])
+          .toList();
+
+      // MedicationRoutine 객체 생성
+      final routine = MedicationRoutine.create(
+        userId: authProvider.currentUser!.id,
+        name: _medicationNameController.text,
+        description: _medicationPurposeController.text.isNotEmpty
+            ? _medicationPurposeController.text
+            : null,
+        takeTime: _selectedTimes,
+        numPerTake: int.parse(_medicationAmountController.text),
+        weekday: selectedWeekdays,
+        startDay: _startDate,
+        endDay: _endDate!,
+      );
+
+      // Provider를 통해 약 등록
+      await medicationProvider.addRoutine(routine);
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('약이 성공적으로 등록되었습니다.')));
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('약 등록에 실패했습니다: $e')));
+      }
+    }
   }
 }

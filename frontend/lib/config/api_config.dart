@@ -29,5 +29,5 @@ class ApiConfig {
   };
 
   // 타임아웃 설정
-  static const Duration timeout = Duration(seconds: 30);
+  static const Duration timeout = Duration(seconds: 120);
 }

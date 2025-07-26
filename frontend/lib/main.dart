@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/providers/medication_provider.dart';
 import 'screens/navigationbar_screen.dart';
-import 'screens/auth/login_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/onboarding/initial_info_screen.dart';
 import 'providers/chat_provider.dart';
@@ -20,6 +20,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => WorkflowChatProvider()),
         ChangeNotifierProvider(create: (_) => MedicationCheckLogProvider()),
+        ChangeNotifierProvider(create: (_) => MedicationProvider()),
       ],
       child: MyApp(),
     ),
