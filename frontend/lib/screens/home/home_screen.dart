@@ -3,8 +3,29 @@ import 'package:frontend/screens/emotion/emotion_understand_screen.dart';
 import 'package:frontend/screens/navigationbar_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +53,7 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -178,6 +200,7 @@ class HomeScreen extends StatelessWidget {
                         _MissionCard(
                           missionText: '추천 음악을 들어봐요!',
                           isCompleted: false,
+                          onTap: _scrollToBottom,
                         ),
                       ],
                     ),
@@ -328,8 +351,13 @@ class _HomeNavButton extends StatelessWidget {
 class _MissionCard extends StatefulWidget {
   final String missionText;
   final bool isCompleted;
+  final VoidCallback? onTap;
 
-  const _MissionCard({required this.missionText, required this.isCompleted});
+  const _MissionCard({
+    required this.missionText,
+    required this.isCompleted,
+    this.onTap,
+  });
 
   @override
   State<_MissionCard> createState() => _MissionCardState();
@@ -439,7 +467,7 @@ class _MissionCardState extends State<_MissionCard> {
                         );
                         break;
                       case '추천 음악을 들어봐요!':
-                        // TODO: 이거는 생각해 봐야할 듯
+                        widget.onTap?.call();
                         break;
                     }
                   },
