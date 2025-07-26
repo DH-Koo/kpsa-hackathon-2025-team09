@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/emotion/emotion_understand_screen.dart';
+import 'package:frontend/screens/navigationbar_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -160,27 +162,22 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         _MissionCard(
                           missionText: '오늘치 모든 약을 먹었어요!',
-                          isCompleted: true,
+                          isCompleted: false,
                         ),
                         const SizedBox(height: 8),
                         _MissionCard(
                           missionText: '오늘 내 감정을 살펴봤어요.',
-                          isCompleted: true,
+                          isCompleted: false,
                         ),
                         const SizedBox(height: 8),
                         _MissionCard(
                           missionText: '건강한 잠을 잤어요~',
-                          isCompleted: true,
+                          isCompleted: false,
                         ),
                         const SizedBox(height: 8),
                         _MissionCard(
-                          missionText: '오늘 내 마음을 기록해요.',
-                          isCompleted: true,
-                        ),
-                        const SizedBox(height: 8),
-                        _MissionCard(
-                          missionText: 'MindTune으로 나를 보살펴요',
-                          isCompleted: true,
+                          missionText: '추천 음악을 들어봐요!',
+                          isCompleted: false,
                         ),
                       ],
                     ),
@@ -328,11 +325,24 @@ class _HomeNavButton extends StatelessWidget {
 }
 
 // 미션 카드 위젯
-class _MissionCard extends StatelessWidget {
+class _MissionCard extends StatefulWidget {
   final String missionText;
   final bool isCompleted;
 
   const _MissionCard({required this.missionText, required this.isCompleted});
+
+  @override
+  State<_MissionCard> createState() => _MissionCardState();
+}
+
+class _MissionCardState extends State<_MissionCard> {
+  late bool isChecked;
+
+  @override
+  void initState() {
+    super.initState();
+    isChecked = widget.isCompleted;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -346,16 +356,18 @@ class _MissionCard extends StatelessWidget {
         child: IntrinsicHeight(
           child: Row(
             children: [
-              // 왼쪽 컬러 바
-              Container(
-                width: 8,
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 152, 205, 91),
-                  borderRadius: BorderRadius.horizontal(
-                    left: Radius.circular(12),
-                  ),
-                ),
-              ),
+              // 왼쪽 컬러 바: 체크되지 않았을 때만 표시
+              !isChecked
+                  ? Container(
+                      width: 8,
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(255, 152, 205, 91),
+                        borderRadius: BorderRadius.horizontal(
+                          left: Radius.circular(12),
+                        ),
+                      ),
+                    )
+                  : const SizedBox(width: 0),
               Expanded(
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12),
@@ -380,7 +392,7 @@ class _MissionCard extends StatelessWidget {
                   title: Padding(
                     padding: const EdgeInsets.only(left: 12),
                     child: Text(
-                      missionText,
+                      widget.missionText,
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 15,
@@ -389,12 +401,47 @@ class _MissionCard extends StatelessWidget {
                     ),
                   ),
                   trailing: Icon(
-                    Icons.check,
-                    color: const Color.fromARGB(255, 152, 205, 91),
+                    isChecked ? Icons.check : Icons.crop_square,
+                    color: isChecked
+                        ? const Color.fromARGB(255, 152, 205, 91)
+                        : Colors.grey[300],
                     size: 28,
                   ),
                   onTap: () {
-                    // TODO: 미션 완료 처리 로직
+                    // 각 미션에 따른 페이지 이동
+                    switch (widget.missionText) {
+                      case '오늘치 모든 약을 먹었어요!':
+                        // 바텀 네비게이션을 통해 복약 화면으로 이동 (인덱스 1)
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                NavigationScreen(initialIndex: 1),
+                          ),
+                        );
+                        break;
+                      case '오늘 내 감정을 살펴봤어요.':
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EmotionUnderstandScreen(),
+                          ),
+                        );
+                        break;
+                      case '건강한 잠을 잤어요~':
+                        // 바텀 네비게이션을 통해 수면 화면으로 이동 (인덱스 3)
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                NavigationScreen(initialIndex: 3),
+                          ),
+                        );
+                        break;
+                      case '추천 음악을 들어봐요!':
+                        // TODO: 이거는 생각해 봐야할 듯
+                        break;
+                    }
                   },
                 ),
               ),

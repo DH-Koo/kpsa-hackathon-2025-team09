@@ -7,14 +7,16 @@ import 'package:frontend/screens/sleep/sleep_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class NavigationScreen extends StatefulWidget {
-  const NavigationScreen({super.key});
+  final int initialIndex;
+
+  const NavigationScreen({super.key, this.initialIndex = 0});
 
   @override
   State<NavigationScreen> createState() => _NavigationScreenState();
 }
 
 class _NavigationScreenState extends State<NavigationScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -23,6 +25,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
     SleepScreen(),
     MyPageScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onItemTapped(int index) {
     setState(() {
