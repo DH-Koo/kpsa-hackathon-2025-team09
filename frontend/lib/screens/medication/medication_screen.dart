@@ -29,9 +29,6 @@ class _MedicationScreenState extends State<MedicationScreen> {
   // 각 루틴별, 각 시간별로 선택된 음악 카드 인덱스 (null이면 미선택, 기본 0)
   List<List<int?>> selectedMusicIndexList = [];
 
-  // ★ 추가: 현재 PageView 인덱스 추적용
-  int _currentPageIndex = 1000;
-
   late Future<List<MedicationRoutine>> routinesFuture;
   final int userId = 1; // TODO: 임시 유저 아이디, 나중에 user 모델 나오면 바꾸기!!
 
@@ -67,7 +64,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
       ).loadCheckLogs(userId, selectedDateStr, selectedDayStr);
     });
     _pageController = PageController(initialPage: 1000);
-    _currentPageIndex = 1000; // ★ 추가: 인덱스 초기화
+    // ★ 추가: 인덱스 초기화
   }
 
   @override
@@ -456,7 +453,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
 
                                   // 스와이프할 때는 selectedDate를 조정하지 않음
                                   // 사용자가 직접 날짜를 선택할 때만 변경됨
-                                  _currentPageIndex = index; // 인덱스 갱신
+                                  // 인덱스 갱신
 
                                   // 현재 선택된 날짜에 대한 체크로그 로드
                                   final selectedDateStr = DateFormat(
@@ -618,8 +615,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
                             weekStartDate = monday;
                             selectedDayIndex = picked.weekday - 1;
                             selectedDate = picked;
-                            _currentPageIndex =
-                                1000 + weekDiff; // 현재 페이지 인덱스도 업데이트
+                            // 현재 페이지 인덱스도 업데이트
                           });
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             _pageController.jumpToPage(1000 + weekDiff);
