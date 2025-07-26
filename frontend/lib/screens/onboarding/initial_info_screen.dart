@@ -210,8 +210,16 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
   }
 
   Widget _buildMedicalDiagnosisPage() {
-    bool? hasDiagnosis = _pageStates[1];
-    List<String> selectedDiseases = _pageStates[1]?['diseases'] ?? [];
+    dynamic pageState = _pageStates[1];
+    bool? hasDiagnosis;
+    List<String> selectedDiseases = [];
+
+    if (pageState is Map) {
+      hasDiagnosis = pageState['hasDiagnosis'] as bool?;
+      selectedDiseases = List<String>.from(pageState['diseases'] ?? []);
+    } else if (pageState is bool) {
+      hasDiagnosis = pageState;
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -464,7 +472,18 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
   }
 
   Widget _buildAllergyPage() {
-    bool? hasAllergy = _pageStates[3];
+    dynamic pageState = _pageStates[3];
+    bool? hasAllergy;
+    List<String> selectedAllergies = [];
+
+    if (pageState is Map) {
+      hasAllergy = pageState['hasAllergy'] as bool?;
+      selectedAllergies = List<String>.from(
+        pageState['selectedAllergies'] ?? [],
+      );
+    } else if (pageState is bool) {
+      hasAllergy = pageState;
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -487,7 +506,10 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '네',
                   hasAllergy == true,
-                  () => _updatePageState(3, true),
+                  () => _updatePageState(3, {
+                    'hasAllergy': true,
+                    'selectedAllergies': selectedAllergies,
+                  }),
                 ),
               ),
               const SizedBox(width: 16),
@@ -495,18 +517,70 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '아니오',
                   hasAllergy == false,
-                  () => _updatePageState(3, false),
+                  () => _updatePageState(3, {
+                    'hasAllergy': false,
+                    'selectedAllergies': [],
+                  }),
                 ),
               ),
             ],
           ),
+          if (hasAllergy == true) ...[
+            const SizedBox(height: 32),
+            const Text(
+              '다음 중 알레르기 경험이 있는 것을 모두 선택해 주세요',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildAllergyCheckbox('페니실린 (항생제)', selectedAllergies),
+                    _buildAllergyCheckbox('타이레놀 (해열진통제)', selectedAllergies),
+                    _buildAllergyCheckbox('이부프로펜 (해열진통제)', selectedAllergies),
+                    _buildAllergyCheckbox(
+                      '라모트리진 / 카바마제핀 등 (정신과 약물)',
+                      selectedAllergies,
+                    ),
+                    _buildAllergyCheckbox(
+                      '갑각류 (예: 새우, 게 등)',
+                      selectedAllergies,
+                    ),
+                    _buildAllergyCheckbox('유제품', selectedAllergies),
+                    _buildAllergyCheckbox(
+                      '꽃가루 / 반려동물 털 / 먼지',
+                      selectedAllergies,
+                    ),
+                    _buildAllergyCheckbox('기타 (직접 입력)', selectedAllergies),
+                    _buildAllergyCheckbox('알레르기 없음', selectedAllergies),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildSupplementsPage() {
-    bool? hasSupplements = _pageStates[4];
+    dynamic pageState = _pageStates[4];
+    bool? hasSupplements;
+    List<String> supplements = [];
+    String currentInput = '';
+
+    if (pageState is Map) {
+      hasSupplements = pageState['hasSupplements'] as bool?;
+      supplements = List<String>.from(pageState['supplements'] ?? []);
+      currentInput = pageState['currentInput'] ?? '';
+    } else if (pageState is bool) {
+      hasSupplements = pageState;
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -529,7 +603,11 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '네',
                   hasSupplements == true,
-                  () => _updatePageState(4, true),
+                  () => _updatePageState(4, {
+                    'hasSupplements': true,
+                    'supplements': supplements,
+                    'currentInput': currentInput,
+                  }),
                 ),
               ),
               const SizedBox(width: 16),
@@ -537,18 +615,142 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '아니오',
                   hasSupplements == false,
-                  () => _updatePageState(4, false),
+                  () => _updatePageState(4, {
+                    'hasSupplements': false,
+                    'supplements': [],
+                    'currentInput': '',
+                  }),
                 ),
               ),
             ],
           ),
+          if (hasSupplements == true) ...[
+            const SizedBox(height: 32),
+            const Text(
+              '어떤 제품인가요?',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) => _updatePageState(4, {
+                        'hasSupplements': true,
+                        'supplements': supplements,
+                        'currentInput': value,
+                      }),
+                      decoration: const InputDecoration(
+                        hintText: '제품명을 입력하세요',
+                        border: InputBorder.none,
+                        hintStyle: TextStyle(color: Colors.grey),
+                      ),
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      if (currentInput.isNotEmpty) {
+                        List<String> newSupplements = List.from(supplements);
+                        if (!newSupplements.contains(currentInput)) {
+                          newSupplements.add(currentInput);
+                        }
+                        _updatePageState(4, {
+                          'hasSupplements': true,
+                          'supplements': newSupplements,
+                          'currentInput': '',
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.add, color: Color(0xFF4CAF50)),
+                  ),
+                ],
+              ),
+            ),
+            if (supplements.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                '추가된 제품',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...supplements.map(
+                (supplement) => Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          supplement,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          List<String> newSupplements = List.from(supplements);
+                          newSupplements.remove(supplement);
+                          _updatePageState(4, {
+                            'hasSupplements': true,
+                            'supplements': newSupplements,
+                            'currentInput': currentInput,
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          color: Colors.red,
+                        ),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
         ],
       ),
     );
   }
 
   Widget _buildSideEffectsPage() {
-    bool? hasSideEffects = _pageStates[5];
+    dynamic pageState = _pageStates[5];
+    bool? hasSideEffects;
+    List<String> sideEffects = [];
+    String currentInput = '';
+
+    if (pageState is Map) {
+      hasSideEffects = pageState['hasSideEffects'] as bool?;
+      sideEffects = List<String>.from(pageState['sideEffects'] ?? []);
+      currentInput = pageState['currentInput'] ?? '';
+    } else if (pageState is bool) {
+      hasSideEffects = pageState;
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -571,7 +773,11 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '네',
                   hasSideEffects == true,
-                  () => _updatePageState(5, true),
+                  () => _updatePageState(5, {
+                    'hasSideEffects': true,
+                    'sideEffects': sideEffects,
+                    'currentInput': currentInput,
+                  }),
                 ),
               ),
               const SizedBox(width: 16),
@@ -579,11 +785,124 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '아니오',
                   hasSideEffects == false,
-                  () => _updatePageState(5, false),
+                  () => _updatePageState(5, {
+                    'hasSideEffects': false,
+                    'sideEffects': [],
+                    'currentInput': '',
+                  }),
                 ),
               ),
             ],
           ),
+          if (hasSideEffects == true) ...[
+            const SizedBox(height: 32),
+            const Text(
+              '어떤 부작용이 있었나요?',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) => _updatePageState(5, {
+                        'hasSideEffects': true,
+                        'sideEffects': sideEffects,
+                        'currentInput': value,
+                      }),
+                      decoration: const InputDecoration(
+                        hintText: '부작용을 입력하세요',
+                        border: InputBorder.none,
+                        hintStyle: TextStyle(color: Colors.grey),
+                      ),
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      if (currentInput.isNotEmpty) {
+                        List<String> newSideEffects = List.from(sideEffects);
+                        if (!newSideEffects.contains(currentInput)) {
+                          newSideEffects.add(currentInput);
+                        }
+                        _updatePageState(5, {
+                          'hasSideEffects': true,
+                          'sideEffects': newSideEffects,
+                          'currentInput': '',
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.add, color: Color(0xFF4CAF50)),
+                  ),
+                ],
+              ),
+            ),
+            if (sideEffects.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                '입력한 부작용',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...sideEffects.map(
+                (sideEffect) => Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          sideEffect,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          List<String> newSideEffects = List.from(sideEffects);
+                          newSideEffects.remove(sideEffect);
+                          _updatePageState(5, {
+                            'hasSideEffects': true,
+                            'sideEffects': newSideEffects,
+                            'currentInput': currentInput,
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          color: Colors.red,
+                        ),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
         ],
       ),
     );
@@ -709,6 +1028,72 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
             color: isSelected ? Colors.white : Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAllergyCheckbox(String allergy, List<String> selectedAllergies) {
+    bool isSelected = selectedAllergies.contains(allergy);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GestureDetector(
+        onTap: () {
+          List<String> newSelected = List.from(selectedAllergies);
+          if (isSelected) {
+            newSelected.remove(allergy);
+          } else {
+            // '알레르기 없음'이 선택되면 다른 모든 항목을 해제
+            if (allergy == '알레르기 없음') {
+              newSelected.clear();
+              newSelected.add(allergy);
+            } else {
+              // 다른 항목이 선택되면 '알레르기 없음' 해제
+              newSelected.remove('알레르기 없음');
+              newSelected.add(allergy);
+            }
+          }
+
+          dynamic currentState = _pageStates[3];
+          Map<String, dynamic> newState = {
+            'hasAllergy': true,
+            'selectedAllergies': newSelected,
+          };
+          _updatePageState(3, newState);
+        },
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF4CAF50) : Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFF4CAF50)
+                  : Colors.grey.shade300,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isSelected ? Icons.check_box : Icons.check_box_outline_blank,
+                color: isSelected ? Colors.white : Colors.grey.shade600,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  allergy,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
