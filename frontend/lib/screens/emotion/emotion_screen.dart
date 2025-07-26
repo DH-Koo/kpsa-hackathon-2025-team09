@@ -26,7 +26,7 @@ class EmotionScreen extends StatelessWidget {
             // 챗봇 이미지
             Center(
               child: Image.asset(
-                'assets/image/chatbot.png',
+                'assets/images/chatbot.png',
                 width: 300,
                 height: 300,
                 fit: BoxFit.cover,
