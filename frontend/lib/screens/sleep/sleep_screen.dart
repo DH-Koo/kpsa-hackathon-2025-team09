@@ -139,28 +139,28 @@ class _SleepScreenState extends State<SleepScreen> {
       if (currentTimeMinutes >= sleepTimeMinutes - 15 &&
           currentTimeMinutes < sleepTimeMinutes) {
         setState(() {
-          currentCharacterImage = 'assets/image/character_tired.png';
+          currentCharacterImage = 'assets/images/character_tired.png';
           currentCharacterText = '이제 곧 주무셔야 해요';
         });
       }
       // 수면 시간부터 자정까지
       else if (currentTimeMinutes >= sleepTimeMinutes) {
         setState(() {
-          currentCharacterImage = 'assets/image/character_sleep.png';
+          currentCharacterImage = 'assets/images/character_sleep.png';
           currentCharacterText = '쿨쿨... 자는 시간이에요';
         });
       }
       // 자정부터 기상 시간까지
       else if (currentTimeMinutes < wakeUpTimeMinutes) {
         setState(() {
-          currentCharacterImage = 'assets/image/character_sleep.png';
+          currentCharacterImage = 'assets/images/character_sleep.png';
           currentCharacterText = '쿨쿨... 자는 시간이에요';
         });
       }
       // 기상 시간부터 다음 수면 시간 15분 전까지
       else {
         setState(() {
-          currentCharacterImage = 'assets/image/character_awake.png';
+          currentCharacterImage = 'assets/images/character_awake.png';
           currentCharacterText = '오늘도 활기찬 하루에요!';
         });
       }
@@ -171,7 +171,7 @@ class _SleepScreenState extends State<SleepScreen> {
       if (currentTimeMinutes >= sleepTimeMinutes - 15 &&
           currentTimeMinutes < sleepTimeMinutes) {
         setState(() {
-          currentCharacterImage = 'assets/image/character_tired.png';
+          currentCharacterImage = 'assets/images/character_tired.png';
           currentCharacterText = '이제 곧 주무셔야 해요';
         });
       }
@@ -179,14 +179,14 @@ class _SleepScreenState extends State<SleepScreen> {
       else if (currentTimeMinutes >= sleepTimeMinutes &&
           currentTimeMinutes < wakeUpTimeMinutes) {
         setState(() {
-          currentCharacterImage = 'assets/image/character_sleep.png';
+          currentCharacterImage = 'assets/images/character_sleep.png';
           currentCharacterText = '쿨쿨... 자는 시간이에요';
         });
       }
       // 기상 시간부터 다음 수면 시간 15분 전까지
       else {
         setState(() {
-          currentCharacterImage = 'assets/image/character_awake.png';
+          currentCharacterImage = 'assets/images/character_awake.png';
           currentCharacterText = '오늘도 활기찬 하루를 시작해요!';
         });
       }
