@@ -75,7 +75,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
       builder: (context, chatProvider, child) {
         final messages = chatProvider.messages;
         final isLoading = chatProvider.isLoading;
-        
+
         // 메시지가 추가되거나 로딩 상태가 변경될 때 스크롤을 최하단으로 이동
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
@@ -86,7 +86,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
             );
           }
         });
-        
+
         return ListView.builder(
           controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
@@ -117,7 +117,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(32),
             child: Image.asset(
-              'assets/image/chatbot.png',
+              'assets/images/chatbot.png',
               width: 48,
               height: 48,
               fit: BoxFit.cover,
@@ -200,7 +200,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(32),
               child: Image.asset(
-                'assets/image/chatbot.png',
+                'assets/images/chatbot.png',
                 width: 48,
                 height: 48,
                 fit: BoxFit.cover,
@@ -213,28 +213,27 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
               alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: isUser ? MediaQuery.of(context).size.width * 0.85 : MediaQuery.of(context).size.width * 0.7,
+                  maxWidth: isUser
+                      ? MediaQuery.of(context).size.width * 0.85
+                      : MediaQuery.of(context).size.width * 0.7,
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isUser ? Color.fromARGB(255, 152, 205, 91).withOpacity(0.6) : Colors.grey[800],
+                    color: isUser
+                        ? Color.fromARGB(255, 152, 205, 91).withOpacity(0.6)
+                        : Colors.grey[800],
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     message.message,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 15),
                   ),
                 ),
               ),
             ),
           ),
-          if (isUser) ...[
-            const SizedBox(width: 8),
-          ],
+          if (isUser) ...[const SizedBox(width: 8)],
         ],
       ),
     );
@@ -262,7 +261,10 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                       hintText: '답장하기',
                       hintStyle: TextStyle(color: Colors.white54),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
                     ),
                     onSubmitted: (_) => _sendMessage(),
                     enabled: !isLoading,
@@ -280,7 +282,9 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 3,
-                          valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 152, 205, 91)),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color.fromARGB(255, 152, 205, 91),
+                          ),
                         ),
                       ),
                     )
@@ -293,7 +297,10 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                           color: Color.fromARGB(255, 152, 205, 91),
                           borderRadius: BorderRadius.circular(22),
                         ),
-                        child: const Icon(Icons.arrow_upward, color: Colors.white),
+                        child: const Icon(
+                          Icons.arrow_upward,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
             ],
@@ -351,10 +358,10 @@ class _LoadingDotsAnimationState extends State<LoadingDotsAnimation>
       builder: (context, child) {
         final progress = _animation.value;
         final dotCount = 3;
-        
+
         // 점들이 순차적으로 나타나는 패턴: '.', '..', '...', '', '.', '..', '...'
         final cycle = (progress * 4).floor() % 4; // 0, 1, 2, 3
-        
+
         String dots = '';
         for (int i = 0; i < dotCount; i++) {
           if (i < cycle) {
@@ -363,7 +370,7 @@ class _LoadingDotsAnimationState extends State<LoadingDotsAnimation>
             dots += ' ';
           }
         }
-        
+
         return Text(
           dots,
           style: const TextStyle(

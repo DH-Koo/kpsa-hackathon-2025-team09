@@ -41,7 +41,13 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         // 마지막 model 메시지에서 response 리스트 파싱
         final lastModelMsg = chatProvider.messages.lastWhere(
           (m) => m.isModel,
-          orElse: () => ChatMessage(id: 0, sessionId: 0, sender: 'model', message: '', order: 0),
+          orElse: () => ChatMessage(
+            id: 0,
+            sessionId: 0,
+            sender: 'model',
+            message: '',
+            order: 0,
+          ),
         );
         List<String> responseList = _parseResponseList(lastModelMsg.message);
         if (responseList.isNotEmpty && responseList != _responseList) {
@@ -64,37 +70,42 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
               child: Column(
                 children: [
                   Expanded(
-                    child: _responseList.isEmpty 
-                      ? _buildLoadingView()
-                      : SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 24),
-                              Text(
-                                _responseList[0],
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  height: 1.4,
+                    child: _responseList.isEmpty
+                        ? _buildLoadingView()
+                        : SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const SizedBox(height: 24),
+                                Text(
+                                  _responseList[0],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.4,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 48),
-                              ...List.generate(
-                                _responseList.length > 1 ? _responseList.length - 1 : 0,
-                                (i) => Column(
-                                  children: [
-                                    _buildOptionButton(i, _responseList[i + 1]),
-                                    const SizedBox(height: 24),
-                                  ],
+                                const SizedBox(height: 48),
+                                ...List.generate(
+                                  _responseList.length > 1
+                                      ? _responseList.length - 1
+                                      : 0,
+                                  (i) => Column(
+                                    children: [
+                                      _buildOptionButton(
+                                        i,
+                                        _responseList[i + 1],
+                                      ),
+                                      const SizedBox(height: 24),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 24),
-                            ],
+                                const SizedBox(height: 24),
+                              ],
+                            ),
                           ),
-                        ),
                   ),
                   Row(
                     children: [
@@ -111,36 +122,62 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 18),
                           ),
-                          child: const Text('이전', style: TextStyle(fontSize: 16)),
+                          child: const Text(
+                            '이전',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _selectedIndex != null ? () {
-                            // 선택한 옵션의 텍스트를 content로 하여 메시지 전송
-                            if (_selectedIndex != null && _responseList.length > _selectedIndex! + 1) {
-                              final selectedText = _responseList[_selectedIndex! + 1];
-                              final authProvider = context.read<AuthProvider>();
-                              final userId = authProvider.currentUser?.id ?? 0;
-                              final chatProvider = context.read<ChatProvider>();
-                              chatProvider.sendMessage(selectedText, userId, true, chatProvider.currentSessionId);
-                              
-                              // 선택 상태 초기화
-                              setState(() {
-                                _selectedIndex = null;
-                              });
-                            }
-                          } : () {},
+                          onPressed: _selectedIndex != null
+                              ? () {
+                                  // 선택한 옵션의 텍스트를 content로 하여 메시지 전송
+                                  if (_selectedIndex != null &&
+                                      _responseList.length >
+                                          _selectedIndex! + 1) {
+                                    final selectedText =
+                                        _responseList[_selectedIndex! + 1];
+                                    final authProvider = context
+                                        .read<AuthProvider>();
+                                    final userId =
+                                        authProvider.currentUser?.id ?? 0;
+                                    final chatProvider = context
+                                        .read<ChatProvider>();
+                                    chatProvider.sendMessage(
+                                      selectedText,
+                                      userId,
+                                      true,
+                                      chatProvider.currentSessionId,
+                                    );
+
+                                    // 선택 상태 초기화
+                                    setState(() {
+                                      _selectedIndex = null;
+                                    });
+                                  }
+                                }
+                              : () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _selectedIndex != null ? const Color(0xFF232B34) : const Color(0xFF232B34).withOpacity(0.5),
+                            backgroundColor: _selectedIndex != null
+                                ? const Color(0xFF232B34)
+                                : const Color(0xFF232B34).withOpacity(0.5),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 18),
                           ),
-                          child: Text('다음 단계', style: TextStyle(color: _selectedIndex != null ? Colors.white : Colors.white24, fontSize: 16)),
+                          child: Text(
+                            '다음 단계',
+                            style: TextStyle(
+                              color: _selectedIndex != null
+                                  ? Colors.white
+                                  : Colors.white24,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -162,10 +199,12 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
       if (message.startsWith('{') && message.endsWith('}')) {
         final Map<String, dynamic> responseData = json.decode(message);
         final response = responseData['response'];
-        
+
         // response가 리스트인 경우
         if (response is List) {
-          final List<String> result = response.map((item) => item.toString()).toList();
+          final List<String> result = response
+              .map((item) => item.toString())
+              .toList();
           return result;
         }
         // response가 문자열인 경우 (단일 질문)
@@ -173,14 +212,16 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
           return [response];
         }
       }
-      
+
       // JSON 형태의 리스트인지 확인
       if (message.startsWith('[') && message.endsWith(']')) {
         final List<dynamic> jsonList = json.decode(message);
-        final List<String> result = jsonList.map((item) => item.toString()).toList();
+        final List<String> result = jsonList
+            .map((item) => item.toString())
+            .toList();
         return result;
       }
-      
+
       // 기존 정규식 방식 (백업)
       final decoded = message.contains('[')
           ? RegExp(r'\[(.*?)\]', dotAll: true).firstMatch(message)?.group(0)
@@ -195,7 +236,7 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
             .toList();
         return list;
       }
-      
+
       return [];
     } catch (e) {
       return [];
@@ -208,7 +249,7 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/image/character_icon.png',
+            'assets/images/character_icon.png',
             width: 120,
             height: 120,
           ),
@@ -257,4 +298,4 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
       ),
     );
   }
-} 
+}
