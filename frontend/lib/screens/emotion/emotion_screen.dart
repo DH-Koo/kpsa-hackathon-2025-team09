@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
-import 'package:mindtune_practice/screens/emotion/emotion_manage_screen.dart';
-import 'package:mindtune_practice/screens/emotion/emotion_understand_screen.dart';
+import 'package:frontend/screens/emotion/emotion_manage_screen.dart';
+import 'package:frontend/screens/emotion/emotion_understand_screen.dart';
 
 class EmotionScreen extends StatelessWidget {
   const EmotionScreen({super.key});
