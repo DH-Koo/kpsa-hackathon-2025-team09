@@ -1,11 +1,59 @@
 import 'package:flutter/material.dart';
 import 'emotion/emotion_bar_chart.dart';
 
+// **로 감싸진 텍스트를 볼드체로 변환하는 함수
+Widget buildFormattedText(String text, TextStyle baseStyle) {
+  final List<Widget> widgets = [];
+  final RegExp boldPattern = RegExp(r'\*\*(.*?)\*\*');
+  int lastIndex = 0;
+  
+  for (Match match in boldPattern.allMatches(text)) {
+    // ** 이전의 일반 텍스트
+    if (match.start > lastIndex) {
+      widgets.add(Text(
+        text.substring(lastIndex, match.start),
+        style: baseStyle,
+      ));
+    }
+    
+    // **로 감싸진 볼드 텍스트
+    widgets.add(Text(
+      match.group(1)!,
+      style: baseStyle.copyWith(fontWeight: FontWeight.bold),
+    ));
+    
+    lastIndex = match.end;
+  }
+  
+  // 마지막 ** 이후의 일반 텍스트
+  if (lastIndex < text.length) {
+    widgets.add(Text(
+      text.substring(lastIndex),
+      style: baseStyle,
+    ));
+  }
+  
+  return RichText(
+    text: TextSpan(
+      children: widgets.map((widget) {
+        if (widget is Text) {
+          return TextSpan(
+            text: widget.data,
+            style: widget.style,
+          );
+        }
+        return TextSpan();
+      }).toList(),
+    ),
+  );
+}
+
 class MusicRecommendationScreen extends StatelessWidget {
   final int valenceLevel;
   final int arousalLevel;
   final int stressLevel;
   final int dominanceLevel;
+  final String responseText;
 
   const MusicRecommendationScreen({
     super.key,
@@ -13,17 +61,11 @@ class MusicRecommendationScreen extends StatelessWidget {
     required this.arousalLevel,
     required this.stressLevel,
     required this.dominanceLevel,
+    this.responseText = '',
   });
 
   @override
   Widget build(BuildContext context) {
-    // 임시 더미 음악 데이터
-    final List<Map<String, String>> musicList = [
-      {"title": "Calm Breeze", "artist": "Relaxing Sounds"},
-      {"title": "Morning Energy", "artist": "Sunrise Band"},
-      {"title": "Peaceful Mind", "artist": "Meditation Crew"},
-      {"title": "Stress Free", "artist": "Chill Vibes"},
-    ];
 
     // 감정별 데이터 (null이면 데이터 없음)
     final emotionBarData = [
@@ -57,7 +99,7 @@ class MusicRecommendationScreen extends StatelessWidget {
         elevation: 0,
       ),
       backgroundColor: Colors.black,
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,45 +120,47 @@ class MusicRecommendationScreen extends StatelessWidget {
               summary: '일에 집중이 잘 되었고 평온한 하루였네요!',
             ),
             SizedBox(height: 32),
-            Text(
-              '오늘의 감정에 어울리는 음악을 추천드려요!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 16),
-            Expanded(
-              child: ListView.separated(
-                itemCount: musicList.length,
-                separatorBuilder: (_, __) => Divider(color: Colors.grey[700]),
-                itemBuilder: (context, index) {
-                  final music = musicList[index];
-                  return ListTile(
-                    leading: Icon(Icons.music_note, color: Colors.greenAccent),
-                    title: Text(
-                      music["title"] ?? '',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+            // API 응답 텍스트 표시
+            if (responseText.isNotEmpty) ...[
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[700]!, width: 1),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.psychology, color: Colors.greenAccent, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'AI 분석 결과',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    buildFormattedText(
+                      responseText,
+                      TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                        height: 1.5,
                       ),
                     ),
-                    subtitle: Text(
-                      music["artist"] ?? '',
-                      style: TextStyle(color: Colors.grey[400]),
-                    ),
-                    trailing: Icon(Icons.play_arrow, color: Colors.white),
-                    onTap: () {
-                      // TODO: 음악 재생 기능 연결
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('음악 재생 기능은 추후 제공됩니다.')),
-                      );
-                    },
-                  );
-                },
+                  ],
+                ),
               ),
-            ),
+              SizedBox(height: 32),
+            ],
           ],
         ),
       ),

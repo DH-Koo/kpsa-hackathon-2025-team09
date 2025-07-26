@@ -87,18 +87,49 @@ class ChatApiService {
 
   // POST 요청 헬퍼 (재시도 로직 제거)
   Future<T> post<T>(String endpoint, Map<String, dynamic> data) async {
+    final url = '${ApiConfig.baseUrl}$endpoint';
+    final requestBody = json.encode(data);
+    
+    // 디버깅: 요청 정보 출력
+    print('=== POST 요청 디버깅 ===');
+    print('URL: $url');
+    print('Headers: $_headers');
+    print('Request Body: $requestBody');
+    print('========================');
+    
     try {
       final response = await _getClient
           .post(
-            Uri.parse('${ApiConfig.baseUrl}$endpoint'),
+            Uri.parse(url),
             headers: _headers,
-            body: json.encode(data),
+            body: requestBody,
           )
           .timeout(ApiConfig.timeout);
+      
+      // 디버깅: 응답 정보 출력
+      print('=== POST 응답 디버깅 ===');
+      print('Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+      print('========================');
+      
       _handleError(response);
       final parsedResponse = json.decode(response.body) as T;
+      
+      // 디버깅: 파싱된 응답 출력
+      print('=== 파싱된 응답 ===');
+      print('Parsed Response: $parsedResponse');
+      print('Response Type: ${parsedResponse.runtimeType}');
+      print('===================');
+      
       return parsedResponse;
     } catch (e) {
+      // 디버깅: 에러 정보 출력
+      print('=== POST 요청 에러 ===');
+      print('Error Type: ${e.runtimeType}');
+      print('Error Message: $e');
+      print('====================');
+      
       if (e is ApiException) rethrow;
       throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
     }
