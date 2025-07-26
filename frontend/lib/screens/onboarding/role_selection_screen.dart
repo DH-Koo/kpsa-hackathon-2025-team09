@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import '../auth/login_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
-  const RoleSelectionScreen({Key? key}) : super(key: key);
+  const RoleSelectionScreen({super.key});
 
   void _onRoleSelected(BuildContext context, String role) {
     // 선택된 역할을 저장하고 로그인 화면으로 이동
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => LoginScreen(selectedRole: role),
-      ),
+      MaterialPageRoute(builder: (context) => LoginScreen(selectedRole: role)),
     );
   }
 
@@ -49,9 +47,9 @@ class RoleSelectionScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 60),
-            
+
             // 프롬프트 텍스트
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -66,9 +64,9 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 80),
-            
+
             // 역할 선택 버튼들
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -100,7 +98,11 @@ class RoleSelectionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRoleButton(BuildContext context, String role, VoidCallback onPressed) {
+  Widget _buildRoleButton(
+    BuildContext context,
+    String role,
+    VoidCallback onPressed,
+  ) {
     return SizedBox(
       width: double.infinity,
       height: 64,
@@ -116,12 +118,9 @@ class RoleSelectionScreen extends StatelessWidget {
         ),
         child: Text(
           role,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
-} 
+}

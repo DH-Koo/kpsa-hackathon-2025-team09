@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
 
 class InitialInfoScreen extends StatefulWidget {
-  const InitialInfoScreen({Key? key}) : super(key: key);
+  const InitialInfoScreen({super.key});
 
   @override
   State<InitialInfoScreen> createState() => _InitialInfoScreenState();
@@ -66,7 +64,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: _currentPage > 0 
+                    onPressed: _currentPage > 0
                         ? () => _pageController.previousPage(
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
@@ -74,7 +72,9 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                         : null,
                     icon: Icon(
                       Icons.arrow_back,
-                      color: _currentPage > 0 ? Colors.white : Colors.white.withOpacity(0.3),
+                      color: _currentPage > 0
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.3),
                       size: 24,
                     ),
                   ),
@@ -103,16 +103,13 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                     onPressed: _onSkipPressed,
                     child: const Text(
                       '건너뛰기',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             // 페이지뷰 영역
             Expanded(
               child: PageView.builder(
@@ -124,7 +121,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 },
               ),
             ),
-            
+
             // 하단 버튼 영역
             Padding(
               padding: const EdgeInsets.all(24.0),
@@ -237,7 +234,10 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '네',
                   hasDiagnosis == true,
-                  () => _updatePageState(1, {'hasDiagnosis': true, 'diseases': selectedDiseases}),
+                  () => _updatePageState(1, {
+                    'hasDiagnosis': true,
+                    'diseases': selectedDiseases,
+                  }),
                 ),
               ),
               const SizedBox(width: 16),
@@ -245,7 +245,10 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '아니오',
                   hasDiagnosis == false,
-                  () => _updatePageState(1, {'hasDiagnosis': false, 'diseases': []}),
+                  () => _updatePageState(1, {
+                    'hasDiagnosis': false,
+                    'diseases': [],
+                  }),
                 ),
               ),
             ],
@@ -298,7 +301,11 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
     );
   }
 
-  Widget _buildDiseaseCategory(String category, List<String> diseases, List<String> selectedDiseases) {
+  Widget _buildDiseaseCategory(
+    String category,
+    List<String> diseases,
+    List<String> selectedDiseases,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -311,10 +318,12 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        ...diseases.map((disease) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: _buildDiseaseButton(disease, selectedDiseases),
-        )),
+        ...diseases.map(
+          (disease) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _buildDiseaseButton(disease, selectedDiseases),
+          ),
+        ),
       ],
     );
   }
@@ -329,10 +338,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
         } else {
           newSelected.add(disease);
         }
-        _updatePageState(1, {
-          'hasDiagnosis': true,
-          'diseases': newSelected,
-        });
+        _updatePageState(1, {'hasDiagnosis': true, 'diseases': newSelected});
       },
       child: Container(
         width: double.infinity,
@@ -407,22 +413,24 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            ...medications.map((med) => Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                med,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
+            ...medications.map(
+              (med) => Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  med,
+                  style: const TextStyle(color: Colors.black, fontSize: 14),
                 ),
               ),
-            )),
+            ),
           ],
           const SizedBox(height: 16),
           SizedBox(
@@ -617,14 +625,18 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
     List<String> options = ['전혀 안 함', '가끔', '주 1-2회', '주 3-4회', '매일'];
 
     return Column(
-      children: options.map((option) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: _buildSelectionButton(
-          option,
-          selectedOption == option,
-          () => _updatePageState(6, option),
-        ),
-      )).toList(),
+      children: options
+          .map(
+            (option) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildSelectionButton(
+                option,
+                selectedOption == option,
+                () => _updatePageState(6, option),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -652,21 +664,35 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
 
   Widget _buildSmokingOptions() {
     String? selectedOption = _pageStates[7];
-    List<String> options = ['전혀 안 함', '가끔', '하루 1-5개비', '하루 6-10개비', '하루 10개비 이상'];
+    List<String> options = [
+      '전혀 안 함',
+      '가끔',
+      '하루 1-5개비',
+      '하루 6-10개비',
+      '하루 10개비 이상',
+    ];
 
     return Column(
-      children: options.map((option) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: _buildSelectionButton(
-          option,
-          selectedOption == option,
-          () => _updatePageState(7, option),
-        ),
-      )).toList(),
+      children: options
+          .map(
+            (option) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildSelectionButton(
+                option,
+                selectedOption == option,
+                () => _updatePageState(7, option),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
-  Widget _buildSelectionButton(String text, bool isSelected, VoidCallback onTap) {
+  Widget _buildSelectionButton(
+    String text,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -688,4 +714,4 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
       ),
     );
   }
-} 
+}
