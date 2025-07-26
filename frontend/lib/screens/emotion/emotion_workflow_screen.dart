@@ -36,6 +36,54 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
     super.dispose();
   }
 
+  // **로 감싸진 텍스트를 볼드체로 변환하는 함수
+  Widget _buildFormattedText(String text, TextStyle baseStyle) {
+    final List<Widget> widgets = [];
+    final RegExp boldPattern = RegExp(r'\*\*(.*?)\*\*');
+    int lastIndex = 0;
+    
+    for (Match match in boldPattern.allMatches(text)) {
+      // ** 이전의 일반 텍스트
+      if (match.start > lastIndex) {
+        widgets.add(Text(
+          text.substring(lastIndex, match.start),
+          style: baseStyle,
+        ));
+      }
+      
+      // **로 감싸진 볼드 텍스트
+      widgets.add(Text(
+        match.group(1)!,
+        style: baseStyle.copyWith(fontWeight: FontWeight.bold),
+      ));
+      
+      lastIndex = match.end;
+    }
+    
+    // 마지막 ** 이후의 일반 텍스트
+    if (lastIndex < text.length) {
+      widgets.add(Text(
+        text.substring(lastIndex),
+        style: baseStyle,
+      ));
+    }
+    
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        children: widgets.map((widget) {
+          if (widget is Text) {
+            return TextSpan(
+              text: widget.data,
+              style: widget.style,
+            );
+          }
+          return TextSpan();
+        }).toList(),
+      ),
+    );
+  }
+
   void _sendInitialMessage() {
     final authProvider = context.read<AuthProvider>();
     final userId = authProvider.currentUser?.id ?? 0;
@@ -92,16 +140,26 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   // 질문 텍스트 또는 로딩 텍스트
-                                  Text(
-                                    isLoading ? '생각 중...' : _responseList.isNotEmpty ? _responseList[0] : '',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      height: 1.4,
-                                    ),
-                                  ),
+                                  isLoading 
+                                    ? Text(
+                                        '생각 중...',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.4,
+                                        ),
+                                      )
+                                    : _buildFormattedText(
+                                        _responseList.isNotEmpty ? _responseList[0] : '',
+                                        const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.4,
+                                        ),
+                                      ),
                                   const SizedBox(height: 48),
                                   // 로딩 중이 아닐 때만 옵션 버튼들 표시
                                   if (!isLoading) ...[
@@ -341,10 +399,9 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
           ),
           borderRadius: BorderRadius.circular(32),
         ),
-        child: Text(
+        child: _buildFormattedText(
           text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
+          TextStyle(
             color: isSelected
                 ? Colors.white
                 : Colors.white54,

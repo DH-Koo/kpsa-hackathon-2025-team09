@@ -22,6 +22,53 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
     super.dispose();
   }
 
+  // **로 감싸진 텍스트를 볼드체로 변환하는 함수
+  Widget _buildFormattedText(String text, TextStyle baseStyle) {
+    final List<Widget> widgets = [];
+    final RegExp boldPattern = RegExp(r'\*\*(.*?)\*\*');
+    int lastIndex = 0;
+    
+    for (Match match in boldPattern.allMatches(text)) {
+      // ** 이전의 일반 텍스트
+      if (match.start > lastIndex) {
+        widgets.add(Text(
+          text.substring(lastIndex, match.start),
+          style: baseStyle,
+        ));
+      }
+      
+      // **로 감싸진 볼드 텍스트
+      widgets.add(Text(
+        match.group(1)!,
+        style: baseStyle.copyWith(fontWeight: FontWeight.bold),
+      ));
+      
+      lastIndex = match.end;
+    }
+    
+    // 마지막 ** 이후의 일반 텍스트
+    if (lastIndex < text.length) {
+      widgets.add(Text(
+        text.substring(lastIndex),
+        style: baseStyle,
+      ));
+    }
+    
+    return RichText(
+      text: TextSpan(
+        children: widgets.map((widget) {
+          if (widget is Text) {
+            return TextSpan(
+              text: widget.data,
+              style: widget.style,
+            );
+          }
+          return TextSpan();
+        }).toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -213,9 +260,9 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                         : Colors.grey[800],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
+                  child: _buildFormattedText(
                     message.message,
-                    style: TextStyle(color: Colors.white, fontSize: 15),
+                    TextStyle(color: Colors.white, fontSize: 15),
                   ),
                 ),
               ),
@@ -290,38 +337,16 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        width: hasText ? 44 : (shouldShowStopButton ? 100 : 44),
+                        width: 44,
                         height: 44,
-                        padding: hasText
-                            ? null
-                            : (shouldShowStopButton
-                                  ? const EdgeInsets.symmetric(horizontal: 16)
-                                  : null),
                         decoration: BoxDecoration(
                           color: Color.fromARGB(255, 152, 205, 91),
                           borderRadius: BorderRadius.circular(22),
                         ),
-                        child: hasText
-                            ? const Icon(
-                                Icons.arrow_upward,
-                                color: Colors.white,
-                              )
-                            : shouldShowStopButton
-                            ? Container(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '그만하기',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              )
-                            : const Icon(
-                                Icons.arrow_upward,
-                                color: Colors.white,
-                              ),
+                        child: const Icon(
+                          Icons.arrow_upward,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
             ],
