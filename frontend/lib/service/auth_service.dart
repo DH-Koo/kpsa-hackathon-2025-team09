@@ -213,13 +213,21 @@ class AuthService {
   // GET 요청 헬퍼
   Future<Map<String, dynamic>> _get(String endpoint) async {
     try {
+      // 디버깅: GET 요청 정보 출력
+      print('[GET] endpoint: $endpoint');
+
       final response = await _client
           .get(Uri.parse('${ApiConfig.baseUrl}$endpoint'), headers: _headers)
           .timeout(ApiConfig.timeout);
 
+      // 디버깅: 응답 상태 및 body 출력
+      print('[GET] response.statusCode: ${response.statusCode}');
+      print('[GET] response.body: ${response.body}');
+
       _handleError(response);
       return json.decode(response.body);
     } catch (e) {
+      print('[GET] 네트워크 오류 또는 예외 발생: $e');
       if (e is ApiException) rethrow;
       throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
     }

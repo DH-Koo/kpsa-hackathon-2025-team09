@@ -95,7 +95,7 @@ class ChatApiService {
             body: json.encode(data),
           )
           .timeout(ApiConfig.timeout);
-      print(response);
+      print(response.body);
       _handleError(response);
       final parsedResponse = json.decode(response.body) as T;
       return parsedResponse;
