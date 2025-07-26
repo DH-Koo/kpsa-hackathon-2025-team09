@@ -306,7 +306,6 @@ class SimpleEmotionScreenState extends State<SimpleEmotionScreen>
           stressLevel: _stressLevel,
           onChanged: (v) => setState(() => _stressLevel = v),
         );
-        
       case 2:
         return DominanceOnboardingPage(
           key: ValueKey(2),
@@ -575,6 +574,125 @@ class StressOnboardingPage extends StatelessWidget {
   }
 }
 
+class DominanceOnboardingPage extends StatelessWidget {
+  final Size screenSize;
+  final int dominanceLevel;
+  final ValueChanged<int> onChanged;
+  final VoidCallback? onComplete;
+  const DominanceOnboardingPage({
+    super.key,
+    required this.screenSize,
+    required this.dominanceLevel,
+    required this.onChanged,
+    this.onComplete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: screenSize.width,
+      height: screenSize.height,
+      child: Stack(
+        children: [
+          // 배경 그라데이션 차오름
+          StressGradientBackground(
+            fillRatio: dominanceLevel / 100.0,
+            screenSize: screenSize,
+          ),
+          // 상단 문구
+          Positioned(
+            top: 100,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                '감정을 얼마나 통제하고 계신가요?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'Pretendard',
+                ),
+              ),
+            ),
+          ),
+          // 슬라이더
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$dominanceLevel',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 24),
+                Container(
+                  width: screenSize.width * 0.7,
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: Color(0xFFB2FF59),
+                      inactiveTrackColor: Colors.grey[800],
+                      thumbColor: Color(0xFFB2FF59),
+                      overlayColor: Color(0xFFB2FF59).withOpacity(0.2),
+                      trackHeight: 8,
+                      thumbShape: RoundSliderThumbShape(enabledThumbRadius: 14),
+                    ),
+                    child: Slider(
+                      min: 0,
+                      max: 100,
+                      divisions: 100,
+                      value: dominanceLevel.toDouble(),
+                      onChanged: (v) => onChanged(v.round()),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 완료 버튼 (우측 하단)
+          Positioned(
+            right: 30,
+            bottom: 50,
+            child: GestureDetector(
+              onTap: () {
+                if (onComplete != null) {
+                  onComplete!();
+                }
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "완료",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Icon(Icons.check, color: Colors.white, size: 18),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // X, Y축만 크게 그리는 위젯 추가
 class XYAxisBackground extends StatelessWidget {
   final Size screenSize;
@@ -821,124 +939,4 @@ class _QuadrantData {
     required this.emotions,
     required this.align,
   });
-}
-
-
-class DominanceOnboardingPage extends StatelessWidget {
-  final Size screenSize;
-  final int dominanceLevel;
-  final ValueChanged<int> onChanged;
-  final VoidCallback? onComplete;
-  const DominanceOnboardingPage({
-    super.key,
-    required this.screenSize,
-    required this.dominanceLevel,
-    required this.onChanged,
-    this.onComplete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: screenSize.width,
-      height: screenSize.height,
-      child: Stack(
-        children: [
-          // 배경 그라데이션 차오름
-          StressGradientBackground(
-            fillRatio: dominanceLevel / 100.0,
-            screenSize: screenSize,
-          ),
-          // 상단 문구
-          Positioned(
-            top: 100,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                '감정을 얼마나 통제하고 계신가요?',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: 'Pretendard',
-                ),
-              ),
-            ),
-          ),
-          // 슬라이더
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$dominanceLevel',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 24),
-                Container(
-                  width: screenSize.width * 0.7,
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: Color(0xFFB2FF59),
-                      inactiveTrackColor: Colors.grey[800],
-                      thumbColor: Color(0xFFB2FF59),
-                      overlayColor: Color(0xFFB2FF59).withOpacity(0.2),
-                      trackHeight: 8,
-                      thumbShape: RoundSliderThumbShape(enabledThumbRadius: 14),
-                    ),
-                    child: Slider(
-                      min: 0,
-                      max: 100,
-                      divisions: 100,
-                      value: dominanceLevel.toDouble(),
-                      onChanged: (v) => onChanged(v.round()),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 완료 버튼 (우측 하단)
-          Positioned(
-            right: 30,
-            bottom: 50,
-            child: GestureDetector(
-              onTap: () {
-                if (onComplete != null) {
-                  onComplete!();
-                }
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "완료",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Icon(Icons.check, color: Colors.white, size: 18),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
