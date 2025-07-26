@@ -61,6 +61,54 @@ class MedicationDayCard extends StatelessWidget {
           );
         }
 
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  SizedBox(height: 16),
+                  Text(
+                    '약 정보를 불러오는데 실패했습니다',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '${snapshot.error}',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // null 체크 추가
+        if (!snapshot.hasData || snapshot.data == null) {
+          return Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Center(
+              child: Column(
+                children: [
+                  Icon(Icons.medication_outlined, color: Colors.grey, size: 48),
+                  SizedBox(height: 16),
+                  Text(
+                    '등록된 약이 없습니다',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '약을 등록해주세요',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         final routines = snapshot.data!;
         // final selectedDate = weekDates[selectedDayIndex]; // 이 줄 삭제
         final todaysRoutines = routines
