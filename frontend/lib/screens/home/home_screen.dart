@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/home/widgets/mission_card.dart';
 import 'package:frontend/screens/home/widgets/recommendation_category.dart';
+import 'package:frontend/screens/navigationbar_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -263,7 +264,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                   size: 16,
                                 ),
                                 onPressed: () {
-                                  // TODO: 복약 상태 확인 화면으로 이동
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          NavigationScreen(initialIndex: 1),
+                                    ),
+                                  );
                                 },
                               ),
                             ],
