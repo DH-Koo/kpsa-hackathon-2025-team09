@@ -8,7 +8,7 @@ class MedicationService {
   // 약 목록 전체 조회
   Future<List<MedicationRoutine>> fetchRoutines(int userId) async {
     try {
-      final endpoint = '${ApiConfig.medicineBase}?user=$userId';
+      final endpoint = '${ApiConfig.medicineBase}$userId/';
       print('[fetchRoutines] 호출할 엔드포인트: $endpoint');
       final data = await _api.get<List<dynamic>>(endpoint);
 
