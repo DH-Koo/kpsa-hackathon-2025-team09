@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class MedicationInputScreen extends StatefulWidget {
-  const MedicationInputScreen({super.key});
+class MedicationEditScreen extends StatefulWidget {
+  const MedicationEditScreen({super.key});
 
   @override
-  State<MedicationInputScreen> createState() => _MedicationInputScreenState();
+  State<MedicationEditScreen> createState() => _MedicationEditScreenState();
 }
 
-class _MedicationInputScreenState extends State<MedicationInputScreen> {
+class _MedicationEditScreenState extends State<MedicationEditScreen> {
   final TextEditingController _medicationNameController = TextEditingController();
   final TextEditingController _medicationPurposeController = TextEditingController();
   final TextEditingController _medicationAmountController = TextEditingController();
@@ -601,7 +601,7 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
           elevation: 0,
         ),
         child: const Text(
-          '완료 ',
+          '수정하기',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
