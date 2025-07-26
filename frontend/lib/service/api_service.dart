@@ -88,17 +88,26 @@ class ChatApiService {
   // POST 요청 헬퍼 (재시도 로직 제거)
   Future<T> post<T>(String endpoint, Map<String, dynamic> data) async {
     try {
+      final url = '${ApiConfig.baseUrl}$endpoint';
+      final body = json.encode(data);
+
+      print('[ApiService] POST 요청: $url');
+      print('[ApiService] 요청 데이터: $body');
+      print('[ApiService] 요청 헤더: $_headers');
+
       final response = await _getClient
-          .post(
-            Uri.parse('${ApiConfig.baseUrl}$endpoint'),
-            headers: _headers,
-            body: json.encode(data),
-          )
+          .post(Uri.parse(url), headers: _headers, body: body)
           .timeout(ApiConfig.timeout);
+
+      print('[ApiService] 응답 상태 코드: ${response.statusCode}');
+      print('[ApiService] 응답 헤더: ${response.headers}');
+      print('[ApiService] 응답 본문: ${response.body}');
+
       _handleError(response);
       final parsedResponse = json.decode(response.body) as T;
       return parsedResponse;
     } catch (e) {
+      print('[ApiService] POST 요청 실패: $e');
       if (e is ApiException) rethrow;
       throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
     }

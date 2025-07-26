@@ -1,9 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../models/medication.dart';
+import '../../service/medication_service.dart';
+import '../../providers/auth_provider.dart';
 import 'medication_edit_screen.dart';
 import 'medication_input_screen.dart';
 
-class MedicationListScreen extends StatelessWidget {
+class MedicationListScreen extends StatefulWidget {
   const MedicationListScreen({super.key});
+
+  @override
+  State<MedicationListScreen> createState() => _MedicationListScreenState();
+}
+
+class _MedicationListScreenState extends State<MedicationListScreen> {
+  List<MedicationRoutine> _routines = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRoutines();
+  }
+
+  Future<void> _loadRoutines() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final currentUser = authProvider.currentUser;
+
+      if (currentUser == null) {
+        setState(() {
+          _error = '로그인이 필요합니다.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final routines = await MedicationService().fetchRoutines(currentUser.id);
+      setState(() {
+        _routines = routines;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = '약 목록을 불러오는데 실패했습니다: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _deleteRoutine(MedicationRoutine routine) async {
+    try {
+      // 삭제 확인 다이얼로그
+      final shouldDelete = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('복약 삭제'),
+          content: Text('${routine.name}을(를) 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('삭제'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldDelete == true) {
+        await MedicationService().deleteRoutine(routine.id);
+
+        // 성공 메시지 표시
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${routine.name}이(가) 삭제되었습니다.'),
+              backgroundColor: Color.fromARGB(255, 152, 205, 91),
+            ),
+          );
+        }
+
+        // 목록 새로고침
+        await _loadRoutines();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('삭제에 실패했습니다: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,54 +125,83 @@ class MedicationListScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _loadRoutines,
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle('현재 복용 중인 약'),
-                    const SizedBox(height: 12),
-                    _buildMedicationCard(
-                      context,
-                      '타이레놀',
-                      '월, 화, 수',
-                      '오후 6:00',
-                      'assets/images/pill_blue.png',
-                      '07/26',
-                      '07/28',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildMedicationCard(
-                      context,
-                      '약',
-                      '화, 목, 토',
-                      '오후 1:40',
-                      'assets/images/pill_green.png',
-                      '07/20',
-                      '08/15',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildMedicationCard(
-                      context,
-                      '약2',
-                      '매일',
-                      '오후 2:50',
-                      'assets/images/pill_red.png',
-                      '07/15',
-                      '08/30',
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            Expanded(child: _buildBody()),
             _buildAddButton(context),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              _error!,
+              style: const TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadRoutines,
+              child: const Text('다시 시도'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_routines.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.medication_outlined, color: Colors.grey, size: 48),
+            SizedBox(height: 16),
+            Text(
+              '등록된 약이 없습니다',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '약을 등록해주세요',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('현재 복용 중인 약'),
+          const SizedBox(height: 12),
+          ..._routines.map((routine) => _buildMedicationCard(context, routine)),
+        ],
       ),
     );
   }
@@ -88,15 +217,32 @@ class MedicationListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMedicationCard(
-    BuildContext context,
-    String name,
-    String weekday,
-    String alarmTime,
-    String imagePath,
-    String startDate,
-    String endDate,
-  ) {
+  Widget _buildMedicationCard(BuildContext context, MedicationRoutine routine) {
+    // 약 아이콘 색상 결정 (약 ID에 따라)
+    final pillColors = [
+      'assets/images/pill_blue.png',
+      'assets/images/pill_green.png',
+      'assets/images/pill_red.png',
+      'assets/images/pill_yellow.png',
+    ];
+    final imagePath = pillColors[routine.id % pillColors.length];
+
+    // 요일 문자열 생성
+    final weekday = routine.weekday.join(', ');
+
+    // 시간 문자열 생성
+    final timeStrings = routine.takeTime
+        .map(
+          (time) =>
+              '${time[0].toString().padLeft(2, '0')}:${time[1].toString().padLeft(2, '0')}',
+        )
+        .join(', ');
+
+    // 날짜 문자열 생성
+    final startDate =
+        '${routine.startDay.month.toString().padLeft(2, '0')}/${routine.startDay.day.toString().padLeft(2, '0')}';
+    final endDate =
+        '${routine.endDay.month.toString().padLeft(2, '0')}/${routine.endDay.day.toString().padLeft(2, '0')}';
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -146,7 +292,7 @@ class MedicationListScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    routine.name,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -164,7 +310,7 @@ class MedicationListScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    alarmTime,
+                    timeStrings,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade600,
@@ -183,7 +329,20 @@ class MedicationListScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () => _deleteRoutine(routine),
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                  tooltip: '삭제',
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.grey,
+                  size: 16,
+                ),
+              ],
+            ),
           ],
         ),
       ),

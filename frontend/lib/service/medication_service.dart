@@ -9,16 +9,29 @@ class MedicationService {
   Future<List<MedicationRoutine>> fetchRoutines(int userId) async {
     try {
       final endpoint = '${ApiConfig.medicineBase}?user=$userId';
+      print('[fetchRoutines] 호출할 엔드포인트: $endpoint');
       final data = await _api.get<List<dynamic>>(endpoint);
 
       // 디버깅을 위한 로그 추가
       print('[fetchRoutines] API 응답: $data');
+      print('[fetchRoutines] 응답 데이터 개수: ${data.length}');
 
-      return data.map((e) => MedicationRoutine.fromJson(e)).toList();
+      final routines = data.map((e) => MedicationRoutine.fromJson(e)).toList();
+      print('[fetchRoutines] 파싱된 루틴 개수: ${routines.length}');
+
+      for (var routine in routines.take(3)) {
+        print(
+          '[fetchRoutines] 루틴 샘플 - id: ${routine.id}, name: ${routine.name}, weekday: ${routine.weekday}, startDay: ${routine.startDay}, endDay: ${routine.endDay}',
+        );
+      }
+
+      return routines;
     } catch (e, stack) {
       print('[fetchRoutines] 에러 발생: $e\n$stack');
-      // 약이 없을 때는 빈 배열 반환
-      if (e.toString().contains('404') || e.toString().contains('500')) {
+      // 약이 없거나 API 오류일 때는 빈 배열 반환
+      if (e.toString().contains('404') ||
+          e.toString().contains('405') ||
+          e.toString().contains('500')) {
         print('[fetchRoutines] 약 목록이 없거나 서버 오류, 빈 배열 반환');
         return [];
       }
@@ -30,13 +43,22 @@ class MedicationService {
   Future<MedicationRoutine> createRoutine(MedicationRoutine routine) async {
     try {
       final endpoint = ApiConfig.medicineBase;
-      final data = await _api.post<Map<String, dynamic>>(
-        endpoint,
-        routine.toJson(),
-      );
-      return MedicationRoutine.fromJson(data);
+      final requestData = routine.toJson();
+
+      print('[createRoutine] 요청 데이터: $requestData');
+      print('[createRoutine] 엔드포인트: $endpoint');
+
+      final data = await _api.post<Map<String, dynamic>>(endpoint, requestData);
+
+      print('[createRoutine] 서버 응답: $data');
+
+      final createdRoutine = MedicationRoutine.fromJson(data);
+      print('[createRoutine] 생성된 루틴: ${createdRoutine.toJson()}');
+
+      return createdRoutine;
     } catch (e, stack) {
-      print('[createRoutine] 에러 발생: $e\n$stack');
+      print('[createRoutine] 에러 발생: $e');
+      print('[createRoutine] 스택 트레이스: $stack');
       rethrow;
     }
   }
