@@ -92,7 +92,7 @@ class _SleepScreenState extends State<SleepScreen> {
       initialItem: wakeUpTime.minute,
     );
 
-    Widget _buildTimePicker({
+    Widget buildTimePicker({
       required FixedExtentScrollController hourController,
       required FixedExtentScrollController minuteController,
       required TimeOfDay currentTime,
@@ -554,7 +554,7 @@ class _SleepScreenState extends State<SleepScreen> {
                                                 // 왼쪽: 시간 선택기
                                                 Expanded(
                                                   flex: 1,
-                                                  child: _buildTimePicker(
+                                                  child: buildTimePicker(
                                                     hourController:
                                                         _sleepHourController,
                                                     minuteController:
@@ -1044,7 +1044,7 @@ class _SleepScreenState extends State<SleepScreen> {
                                                 // 왼쪽: 시간 선택기
                                                 Expanded(
                                                   flex: 1,
-                                                  child: _buildTimePicker(
+                                                  child: buildTimePicker(
                                                     hourController:
                                                         _wakeUpHourController,
                                                     minuteController:
