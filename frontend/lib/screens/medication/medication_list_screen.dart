@@ -53,19 +53,19 @@ class MedicationListScreen extends StatelessWidget {
                     _buildMedicationCard(
                       '타이레놀',
                       '필요할 때에만',
-                      'assets/image/pill_blue.png',
+                      'assets/images/pill_blue.png',
                     ),
                     const SizedBox(height: 8),
                     _buildMedicationCard(
                       '약',
                       '화, 목, 토\n오후 1:40',
-                      'assets/image/pill_green.png',
+                      'assets/images/pill_green.png',
                     ),
                     const SizedBox(height: 8),
                     _buildMedicationCard(
                       '약2',
                       '매일\n오후 2:50',
-                      'assets/image/pill_red.png',
+                      'assets/images/pill_red.png',
                     ),
                     const SizedBox(height: 24),
                     _buildSectionTitle('현재 복용하지 않는 약'),

@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import '../config/api_config.dart';
-import '../models/chat_session.dart';
-import '../models/chat_message.dart';
 
 /// 백엔드 API와 통신하는 채팅 서비스 클래스
 class ChatApiService {
@@ -128,7 +125,8 @@ class ChatApiService {
       throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
     }
   }
-// DELETE 요청 헬퍼
+
+  // DELETE 요청 헬퍼
   Future<void> delete(String endpoint) async {
     try {
       final response = await _getClient
@@ -140,22 +138,30 @@ class ChatApiService {
       throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
     }
   }
-  
-  static Future<String> sendMessageToBot(String userInput, int userId, bool isWorkflow, int? sessionId) async {
+
+  static Future<String> sendMessageToBot(
+    String userInput,
+    int userId,
+    bool isWorkflow,
+    int? sessionId,
+  ) async {
     final data = <String, dynamic>{
       'user_input': userInput,
       'user_id': userId,
       'is_workflow': isWorkflow ?? false,
       'character_id': 0,
     };
-    
+
     // session_id가 있으면 추가
     if (sessionId != null) {
       data['session_id'] = sessionId;
     }
     print(data);
     try {
-      final response = await ChatApiService().post<dynamic>(ApiConfig.postChatSession, data);
+      final response = await ChatApiService().post<dynamic>(
+        ApiConfig.postChatSession,
+        data,
+      );
       print(response);
       // 응답이 List인 경우와 Map인 경우를 모두 처리
       if (response is List) {
@@ -179,7 +185,6 @@ class ChatApiService {
     }
   }
 }
-
 
 // API 예외 클래스
 class ApiException implements Exception {

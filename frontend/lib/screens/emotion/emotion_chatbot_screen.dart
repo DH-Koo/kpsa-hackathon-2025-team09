@@ -22,18 +22,6 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
     super.dispose();
   }
 
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +63,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
       builder: (context, chatProvider, child) {
         final messages = chatProvider.messages;
         final isLoading = chatProvider.isLoading;
-        
+
         // 메시지가 추가되거나 로딩 상태가 변경될 때 스크롤을 최하단으로 이동
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
@@ -86,7 +74,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
             );
           }
         });
-        
+
         return ListView.builder(
           controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
@@ -117,7 +105,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(32),
             child: Image.asset(
-              'assets/image/chatbot.png',
+              'assets/images/chatbot.png',
               width: 48,
               height: 48,
               fit: BoxFit.cover,
@@ -200,7 +188,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(32),
               child: Image.asset(
-                'assets/image/chatbot.png',
+                'assets/images/chatbot.png',
                 width: 48,
                 height: 48,
                 fit: BoxFit.cover,
@@ -213,28 +201,27 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
               alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: isUser ? MediaQuery.of(context).size.width * 0.85 : MediaQuery.of(context).size.width * 0.7,
+                  maxWidth: isUser
+                      ? MediaQuery.of(context).size.width * 0.85
+                      : MediaQuery.of(context).size.width * 0.7,
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isUser ? Color.fromARGB(255, 152, 205, 91).withOpacity(0.6) : Colors.grey[800],
+                    color: isUser
+                        ? Color.fromARGB(255, 152, 205, 91).withOpacity(0.6)
+                        : Colors.grey[800],
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     message.message,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 15),
                   ),
                 ),
               ),
             ),
           ),
-          if (isUser) ...[
-            const SizedBox(width: 8),
-          ],
+          if (isUser) ...[const SizedBox(width: 8)],
         ],
       ),
     );
@@ -246,10 +233,10 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
         final isLoading = chatProvider.isLoading;
         final hasUserSentMessage = chatProvider.hasUserSentMessage;
         final hasText = _controller.text.trim().isNotEmpty;
-        
+
         // 사용자가 메시지를 보낸 적이 있고, 텍스트가 없을 때만 "그만하기" 버튼 표시
         final shouldShowStopButton = hasUserSentMessage && !hasText;
-        
+
         return Container(
           color: const Color(0xFF181F26),
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -268,7 +255,10 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                       hintText: '답장하기',
                       hintStyle: TextStyle(color: Colors.white54),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
                     ),
                     onSubmitted: (_) => _sendMessage(),
                     onChanged: (_) => setState(() {}), // 텍스트 변경 시 UI 업데이트
@@ -287,37 +277,51 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 3,
-                          valueColor: AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 152, 205, 91)),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color.fromARGB(255, 152, 205, 91),
+                          ),
                         ),
                       ),
                     )
                   : GestureDetector(
-                      onTap: hasText ? _sendMessage : (shouldShowStopButton ? _stopChat : null),
+                      onTap: hasText
+                          ? _sendMessage
+                          : (shouldShowStopButton ? _stopChat : null),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
                         width: hasText ? 44 : (shouldShowStopButton ? 60 : 44),
                         height: 44,
-                        padding: hasText ? null : (shouldShowStopButton ? const EdgeInsets.symmetric(horizontal: 16) : null),
+                        padding: hasText
+                            ? null
+                            : (shouldShowStopButton
+                                  ? const EdgeInsets.symmetric(horizontal: 16)
+                                  : null),
                         decoration: BoxDecoration(
                           color: Color.fromARGB(255, 152, 205, 91),
                           borderRadius: BorderRadius.circular(22),
                         ),
-                        child: hasText 
-                            ? const Icon(Icons.arrow_upward, color: Colors.white)
+                        child: hasText
+                            ? const Icon(
+                                Icons.arrow_upward,
+                                color: Colors.white,
+                              )
                             : shouldShowStopButton
-                                ? Container(
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      '그만하기',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  )
-                                : const Icon(Icons.arrow_upward, color: Colors.white),
+                            ? Container(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '그만하기',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.arrow_upward,
+                                color: Colors.white,
+                              ),
                       ),
                     ),
             ],
@@ -380,10 +384,10 @@ class _LoadingDotsAnimationState extends State<LoadingDotsAnimation>
       builder: (context, child) {
         final progress = _animation.value;
         final dotCount = 3;
-        
+
         // 점들이 순차적으로 나타나는 패턴: '.', '..', '...', '', '.', '..', '...'
         final cycle = (progress * 4).floor() % 4; // 0, 1, 2, 3
-        
+
         String dots = '';
         for (int i = 0; i < dotCount; i++) {
           if (i < cycle) {
@@ -392,7 +396,7 @@ class _LoadingDotsAnimationState extends State<LoadingDotsAnimation>
             dots += ' ';
           }
         }
-        
+
         return Text(
           dots,
           style: const TextStyle(
