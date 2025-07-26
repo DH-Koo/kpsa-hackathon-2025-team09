@@ -1056,7 +1056,6 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
             }
           }
 
-          dynamic currentState = _pageStates[3];
           Map<String, dynamic> newState = {
             'hasAllergy': true,
             'selectedAllergies': newSelected,

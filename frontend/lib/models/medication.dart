@@ -25,10 +25,67 @@ class MedicationRoutine {
     required this.endDay,
   });
 
+  // 새로운 약 등록을 위한 생성자 팩토리 메서드
+  factory MedicationRoutine.create({
+    required int userId,
+    required String name,
+    String? description,
+    required List<List<int>> takeTime,
+    required int numPerTake,
+    required List<String> weekday,
+    required DateTime startDay,
+    required DateTime endDay,
+  }) {
+    final numPerDay = takeTime.length;
+    final totalDays = endDay.difference(startDay).inDays + 1;
+
+    return MedicationRoutine(
+      id: 0, // 서버에서 생성될 ID
+      userId: userId,
+      name: name,
+      description: description,
+      takeTime: takeTime,
+      numPerTake: numPerTake,
+      numPerDay: numPerDay,
+      totalDays: totalDays,
+      weekday: weekday,
+      startDay: startDay,
+      endDay: endDay,
+    );
+  }
+
   factory MedicationRoutine.fromJson(Map<String, dynamic> json) {
+    // 날짜 파싱을 안전하게 처리
+    DateTime parseDate(dynamic dateValue) {
+      if (dateValue == null) {
+        throw FormatException('날짜 값이 null입니다');
+      }
+
+      String dateStr = dateValue.toString();
+
+      // YYYY-MM-DD 형식인지 확인
+      if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(dateStr)) {
+        return DateTime.parse(dateStr);
+      }
+
+      // ISO 8601 형식인지 확인
+      if (dateStr.contains('T')) {
+        return DateTime.parse(dateStr);
+      }
+
+      // 다른 형식 시도
+      try {
+        return DateTime.parse(dateStr);
+      } catch (e) {
+        print('날짜 파싱 실패: $dateStr, 에러: $e');
+        // 기본값으로 오늘 날짜 반환
+        return DateTime.now();
+      }
+    }
+
     return MedicationRoutine(
       id: json['id'],
-      userId: json['user'],
+      userId: json['user_id'],
       name: json['name'] ?? '',
       description: json['description'],
       takeTime: (json['take_time'] as List)
@@ -38,15 +95,15 @@ class MedicationRoutine {
       numPerDay: json['num_per_day'],
       totalDays: json['total_days'],
       weekday: List<String>.from(json['weekday'] ?? []),
-      startDay: DateTime.parse(json['start_day']),
-      endDay: DateTime.parse(json['end_day']),
+      startDay: parseDate(json['start_day']),
+      endDay: parseDate(json['end_day']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'user': userId,
+      'user_id': userId,
       'name': name,
       'description': description,
       'take_time': takeTime,

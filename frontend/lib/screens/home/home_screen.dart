@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/home/widgets/mission_card.dart';
 import 'package:frontend/screens/home/widgets/recommendation_category.dart';
 import 'package:frontend/screens/navigationbar_screen.dart';
+import 'package:frontend/screens/medication/medication_input_screen.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -289,7 +290,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         iconColor: Colors.white,
                         label: '복약 추가',
                         onTap: () {
-                          // TODO: 복약 관리 화면에서 바로 복약 추가 바텀시트 띄우기
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const MedicationInputScreen(),
+                            ),
+                          );
                         },
                       ),
                       HomeNavButton(

@@ -30,7 +30,10 @@ class MedicationProvider extends ChangeNotifier {
     _setLoading(true);
     _clearError();
     try {
-      await _service.createRoutine(routine);
+      final createdRoutine = await _service.createRoutine(routine);
+      // 새로 생성된 약을 목록에 추가
+      routines.add(createdRoutine);
+      notifyListeners();
     } catch (e) {
       _error = e.toString();
       notifyListeners();

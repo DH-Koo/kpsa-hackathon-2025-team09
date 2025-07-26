@@ -14,7 +14,7 @@ class ApiConfig {
       '/chat/sessions/'; // POST: sessions/{user_id}/
 
   // 복약 관리 API 엔드포인트
-  static const String medicineBase = '/medicine';
+  static const String medicineBase = '/medicine/';
   static String medicineOfDay(int userId, String day, String weekday) =>
       '/medicine/medicine_of_day/$userId/$day/$weekday/';
   static const String medicineMusic = '/medicine/music/';
@@ -29,5 +29,5 @@ class ApiConfig {
   };
 
   // 타임아웃 설정
-  static const Duration timeout = Duration(seconds: 30);
+  static const Duration timeout = Duration(seconds: 120);
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'medication_edit_screen.dart';
+import 'medication_input_screen.dart';
 
 class MedicationListScreen extends StatelessWidget {
   const MedicationListScreen({super.key});
@@ -41,7 +42,7 @@ class MedicationListScreen extends StatelessWidget {
                       '타이레놀',
                       '월, 화, 수',
                       '오후 6:00',
-                      'assets/image/pill_blue.png',
+                      'assets/images/pill_blue.png',
                       '07/26',
                       '07/28',
                     ),
@@ -51,7 +52,7 @@ class MedicationListScreen extends StatelessWidget {
                       '약',
                       '화, 목, 토',
                       '오후 1:40',
-                      'assets/image/pill_green.png',
+                      'assets/images/pill_green.png',
                       '07/20',
                       '08/15',
                     ),
@@ -61,7 +62,7 @@ class MedicationListScreen extends StatelessWidget {
                       '약2',
                       '매일',
                       '오후 2:50',
-                      'assets/image/pill_red.png',
+                      'assets/images/pill_red.png',
                       '07/15',
                       '08/30',
                     ),
@@ -69,7 +70,7 @@ class MedicationListScreen extends StatelessWidget {
                 ),
               ),
             ),
-            _buildAddButton(),
+            _buildAddButton(context),
           ],
         ),
       ),
@@ -87,16 +88,22 @@ class MedicationListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMedicationCard(BuildContext context, String name, String weekday, String alarmTime, String imagePath, String startDate, String endDate) {
+  Widget _buildMedicationCard(
+    BuildContext context,
+    String name,
+    String weekday,
+    String alarmTime,
+    String imagePath,
+    String startDate,
+    String endDate,
+  ) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           // context는 StatelessWidget이므로 build 메서드의 context를 사용해야 함
           // 따라서 _buildMedicationCard 호출 시 context를 전달하도록 수정
           context,
-          MaterialPageRoute(
-            builder: (context) => const MedicationEditScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const MedicationEditScreen()),
         );
       },
       child: Container(
@@ -176,27 +183,28 @@ class MedicationListScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey,
-              size: 16,
-            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAddButton() {
+  Widget _buildAddButton(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       child: ElevatedButton(
         onPressed: () {
-          // 복약 정보 추가 기능 구현
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MedicationInputScreen(),
+            ),
+          );
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
+          backgroundColor: Color.fromARGB(255, 152, 205, 91),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
@@ -205,12 +213,9 @@ class MedicationListScreen extends StatelessWidget {
         ),
         child: const Text(
           '복약 정보 추가하기',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
-} 
+}

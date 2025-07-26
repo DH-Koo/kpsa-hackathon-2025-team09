@@ -17,41 +17,12 @@ class MedicationCheckLogService {
       return data.map((e) => MedicationCheckLog.fromJson(e)).toList();
     } catch (e, stack) {
       print('[fetchMedicineOfDay] 에러 발생: $e\n$stack');
-      // 임시 데이터 반환
-      return [
-        MedicationCheckLog(
-          id: 0,
-          user: userId,
-          medicine: 1,
-          date: day,
-          time: [8, 0],
-          isTaken: true,
-        ),
-        MedicationCheckLog(
-          id: 1,
-          user: userId,
-          medicine: 2,
-          date: day,
-          time: [9, 0],
-          isTaken: false,
-        ),
-        MedicationCheckLog(
-          id: 2,
-          user: userId,
-          medicine: 2,
-          date: day,
-          time: [12, 0],
-          isTaken: true,
-        ),
-        MedicationCheckLog(
-          id: 3,
-          user: userId,
-          medicine: 1,
-          date: day,
-          time: [20, 0],
-          isTaken: false,
-        ),
-      ];
+      // 복약 체크 로그가 없을 때는 빈 배열 반환
+      if (e.toString().contains('404') || e.toString().contains('500')) {
+        print('[fetchMedicineOfDay] 복약 체크 로그가 없거나 서버 오류, 빈 배열 반환');
+        return [];
+      }
+      rethrow;
     }
   }
 

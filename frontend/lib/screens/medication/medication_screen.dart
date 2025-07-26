@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/medication.dart';
 import '../../service/medication_service.dart';
 import '../../providers/medication_check_log_provider.dart';
+import '../../providers/auth_provider.dart';
 import 'medication_day_card.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'medication_routine_graph.dart';
@@ -29,12 +30,11 @@ class _MedicationScreenState extends State<MedicationScreen> {
   // 각 루틴별, 각 시간별로 선택된 음악 카드 인덱스 (null이면 미선택, 기본 0)
   List<List<int?>> selectedMusicIndexList = [];
 
-  late Future<List<MedicationRoutine>> routinesFuture;
-  final int userId = 1; // TODO: 임시 유저 아이디, 나중에 user 모델 나오면 바꾸기!!
-
+  Future<List<MedicationRoutine>>? routinesFuture;
   late PageController _pageController;
   late DateTime selectedDate;
   int? selectedBarIndex; // 그래프 막대 선택 인덱스
+  bool _initialized = false; // 초기화 완료 여부
 
   @override
   void initState() {
@@ -44,27 +44,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
     weekStartDate = now.subtract(Duration(days: now.weekday - 1));
     selectedDayIndex = now.weekday - 1;
     selectedDate = now;
-    routinesFuture = MedicationService().fetchRoutines(userId);
-    // 체크로그 초기 로드
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final selectedDate = weekStartDate.add(Duration(days: selectedDayIndex));
-      final selectedDateStr = DateFormat('yyyy-MM-dd').format(selectedDate);
-      final selectedDayStr = [
-        '월',
-        '화',
-        '수',
-        '목',
-        '금',
-        '토',
-        '일',
-      ][selectedDate.weekday - 1];
-      Provider.of<MedicationCheckLogProvider>(
-        context,
-        listen: false,
-      ).loadCheckLogs(userId, selectedDateStr, selectedDayStr);
-    });
     _pageController = PageController(initialPage: 1000);
-    // ★ 추가: 인덱스 초기화
   }
 
   @override
@@ -84,6 +64,28 @@ class _MedicationScreenState extends State<MedicationScreen> {
 
   // 날짜의 시,분,초를 0으로 맞추는 함수
   DateTime onlyDate(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
+  // 초기 체크로그 로드 (한 번만 실행)
+  void _initializeCheckLogs(MedicationCheckLogProvider provider, int userId) {
+    if (!_initialized) {
+      _initialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final selectedDateStr = DateFormat('yyyy-MM-dd').format(selectedDate);
+          final selectedDayStr = [
+            '월',
+            '화',
+            '수',
+            '목',
+            '금',
+            '토',
+            '일',
+          ][selectedDate.weekday - 1];
+          provider.loadCheckLogs(userId, selectedDateStr, selectedDayStr);
+        }
+      });
+    }
+  }
 
   Future<DateTime?> _showCalendarBottomSheet(
     BuildContext context,
@@ -218,14 +220,8 @@ class _MedicationScreenState extends State<MedicationScreen> {
                         todayTextStyle: const TextStyle(color: Colors.white),
                       ),
                       daysOfWeekStyle: DaysOfWeekStyle(
-                        weekdayStyle: TextStyle(
-                          color: Colors.white,
-                          // fontWeight: FontWeight.bold,
-                        ),
-                        weekendStyle: TextStyle(
-                          color: Colors.grey[400],
-                          // fontWeight: FontWeight.bold,
-                        ),
+                        weekdayStyle: TextStyle(color: Colors.white),
+                        weekendStyle: TextStyle(color: Colors.grey[400]),
                       ),
                       calendarBuilders: CalendarBuilders(
                         defaultBuilder: (context, day, focusedDay) {
@@ -238,7 +234,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
                               style: TextStyle(
                                 color: isWeekday
                                     ? Colors.white
-                                    : Colors.grey[400], // 주중/주말
+                                    : Colors.grey[400],
                               ),
                             ),
                           );
@@ -247,13 +243,10 @@ class _MedicationScreenState extends State<MedicationScreen> {
                           return Center(
                             child: Text(
                               '${day.day}',
-                              style: TextStyle(
-                                color: Colors.grey[700], // 해당 월이 아니면 더 진한 회색
-                              ),
+                              style: TextStyle(color: Colors.grey[700]),
                             ),
                           );
                         },
-                        // todayBuilder, selectedBuilder 등은 기존 스타일 유지
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -313,10 +306,51 @@ class _MedicationScreenState extends State<MedicationScreen> {
           final checkLogProvider = Provider.of<MedicationCheckLogProvider>(
             context,
           );
+          final authProvider = Provider.of<AuthProvider>(
+            context,
+            listen: false,
+          );
+          final currentUser = authProvider.currentUser;
 
-          // TODO: 복약 성공률 계산 함수 (일단은 항상 이번 주 기준으로 계산함! 다른 주도 가능하긴 한데 굳이??)
+          // 사용자가 로그인하지 않은 경우 처리
+          if (currentUser == null) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  '복약 관리',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                centerTitle: true,
+                backgroundColor: Colors.black,
+              ),
+              backgroundColor: Colors.black,
+              body: Center(
+                child: Text(
+                  '로그인이 필요합니다.',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            );
+          }
+
+          final userId = currentUser.id;
+
+          // routinesFuture 초기화 (한 번만)
+          if (routinesFuture == null) {
+            routinesFuture = MedicationService().fetchRoutines(userId);
+          }
+
+          // 초기 체크로그 로드 (한 번만)
+          _initializeCheckLogs(checkLogProvider, userId);
+
+          // 복약 성공률 계산 함수
           Future<List<int>> getFixedWeeklySuccessRates() async {
-            final routines = await routinesFuture;
+            if (routinesFuture == null) return List.filled(7, 0);
+            final routines = await routinesFuture!;
             final today = DateTime.now();
             final thisMonday = today.subtract(
               Duration(days: today.weekday - 1),
@@ -364,7 +398,6 @@ class _MedicationScreenState extends State<MedicationScreen> {
               ),
               centerTitle: true,
               surfaceTintColor: Colors.transparent,
-              // backgroundColor: Color(0xFF18181B),
               backgroundColor: Colors.black,
               actions: [
                 IconButton(
@@ -389,14 +422,13 @@ class _MedicationScreenState extends State<MedicationScreen> {
                 ),
               ],
             ),
-            // backgroundColor: Color(0xFF18181B),
             backgroundColor: Colors.black,
             body: SafeArea(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 날짜/요일 선택 바 (분리: 요일 고정, 날짜만 스와이프)
+                    // 날짜/요일 선택 바
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Column(
@@ -439,7 +471,6 @@ class _MedicationScreenState extends State<MedicationScreen> {
                             height: 40,
                             child: PageView.builder(
                               controller: _pageController,
-                              // 무한 스와이프처럼 보이게 itemCount 없이
                               onPageChanged: (index) {
                                 setState(() {
                                   final newWeekStartDate = DateTime.now()
@@ -450,29 +481,6 @@ class _MedicationScreenState extends State<MedicationScreen> {
                                       )
                                       .add(Duration(days: 7 * (index - 1000)));
                                   weekStartDate = newWeekStartDate;
-
-                                  // 스와이프할 때는 selectedDate를 조정하지 않음
-                                  // 사용자가 직접 날짜를 선택할 때만 변경됨
-                                  // 인덱스 갱신
-
-                                  // 현재 선택된 날짜에 대한 체크로그 로드
-                                  final selectedDateStr = DateFormat(
-                                    'yyyy-MM-dd',
-                                  ).format(selectedDate);
-                                  final selectedDayStr = [
-                                    '월',
-                                    '화',
-                                    '수',
-                                    '목',
-                                    '금',
-                                    '토',
-                                    '일',
-                                  ][selectedDate.weekday - 1];
-                                  checkLogProvider.loadCheckLogs(
-                                    userId,
-                                    selectedDateStr,
-                                    selectedDayStr,
-                                  );
                                 });
                               },
                               itemBuilder: (context, index) {
@@ -493,9 +501,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
                                     final selected =
                                         date.year == selectedDate.year &&
                                         date.month == selectedDate.month &&
-                                        date.day ==
-                                            selectedDate
-                                                .day; // selectedDate와 비교
+                                        date.day == selectedDate.day;
                                     final isToday =
                                         date.year == today.year &&
                                         date.month == today.month &&
@@ -508,24 +514,25 @@ class _MedicationScreenState extends State<MedicationScreen> {
                                             weekStartDate = weekStart;
                                             selectedDayIndex = i;
                                             selectedDate = date;
-                                            final selectedDateStr = DateFormat(
-                                              'yyyy-MM-dd',
-                                            ).format(date);
-                                            final selectedDayStr = [
-                                              '월',
-                                              '화',
-                                              '수',
-                                              '목',
-                                              '금',
-                                              '토',
-                                              '일',
-                                            ][date.weekday - 1];
-                                            checkLogProvider.loadCheckLogs(
-                                              userId,
-                                              selectedDateStr,
-                                              selectedDayStr,
-                                            );
                                           });
+                                          // 날짜 변경 시 체크로그 다시 로드
+                                          final selectedDateStr = DateFormat(
+                                            'yyyy-MM-dd',
+                                          ).format(date);
+                                          final selectedDayStr = [
+                                            '월',
+                                            '화',
+                                            '수',
+                                            '목',
+                                            '금',
+                                            '토',
+                                            '일',
+                                          ][date.weekday - 1];
+                                          checkLogProvider.loadCheckLogs(
+                                            userId,
+                                            selectedDateStr,
+                                            selectedDayStr,
+                                          );
                                         },
                                         child: Container(
                                           margin: const EdgeInsets.symmetric(
@@ -587,61 +594,63 @@ class _MedicationScreenState extends State<MedicationScreen> {
                       ),
                     ),
 
-                    // 오늘의 복약 리스트 카드 (다른 파일로 분리함)
-                    MedicationDayCard(
-                      routinesFuture: routinesFuture,
-                      weekDates: weekDates,
-                      selectedDayIndex: selectedDayIndex,
-                      selectedDayStr: selectedDayStr,
-                      checkLogProvider: checkLogProvider,
-                      userId: userId,
-                      selectedDate: selectedDate,
-                      onDateSelected: (currentDate) async {
-                        final picked = await _showCalendarBottomSheet(
-                          context,
-                          currentDate,
-                        );
-                        if (picked != null) {
-                          final monday = onlyDate(
-                            picked.subtract(Duration(days: picked.weekday - 1)),
+                    // 오늘의 복약 리스트 카드
+                    if (routinesFuture != null)
+                      MedicationDayCard(
+                        routinesFuture: routinesFuture!,
+                        weekDates: weekDates,
+                        selectedDayIndex: selectedDayIndex,
+                        selectedDayStr: selectedDayStr,
+                        checkLogProvider: checkLogProvider,
+                        userId: userId,
+                        selectedDate: selectedDate,
+                        onDateSelected: (currentDate) async {
+                          final picked = await _showCalendarBottomSheet(
+                            context,
+                            currentDate,
                           );
-                          final today = DateTime.now();
-                          final thisMonday = onlyDate(
-                            today.subtract(Duration(days: today.weekday - 1)),
-                          );
-                          final weekDiff =
-                              monday.difference(thisMonday).inDays ~/ 7;
-                          setState(() {
-                            weekStartDate = monday;
-                            selectedDayIndex = picked.weekday - 1;
-                            selectedDate = picked;
-                            // 현재 페이지 인덱스도 업데이트
-                          });
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            _pageController.jumpToPage(1000 + weekDiff);
-                          });
-                          final selectedDateStr = DateFormat(
-                            'yyyy-MM-dd',
-                          ).format(picked);
-                          final selectedDayStr = [
-                            '월',
-                            '화',
-                            '수',
-                            '목',
-                            '금',
-                            '토',
-                            '일',
-                          ][picked.weekday - 1];
-                          checkLogProvider.loadCheckLogs(
-                            userId,
-                            selectedDateStr,
-                            selectedDayStr,
-                          );
-                        }
-                      },
-                    ),
+                          if (picked != null) {
+                            final monday = onlyDate(
+                              picked.subtract(
+                                Duration(days: picked.weekday - 1),
+                              ),
+                            );
+                            final today = DateTime.now();
+                            final thisMonday = onlyDate(
+                              today.subtract(Duration(days: today.weekday - 1)),
+                            );
+                            final weekDiff =
+                                monday.difference(thisMonday).inDays ~/ 7;
+                            setState(() {
+                              weekStartDate = monday;
+                              selectedDayIndex = picked.weekday - 1;
+                              selectedDate = picked;
+                            });
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              _pageController.jumpToPage(1000 + weekDiff);
+                            });
+                            final selectedDateStr = DateFormat(
+                              'yyyy-MM-dd',
+                            ).format(picked);
+                            final selectedDayStr = [
+                              '월',
+                              '화',
+                              '수',
+                              '목',
+                              '금',
+                              '토',
+                              '일',
+                            ][picked.weekday - 1];
+                            checkLogProvider.loadCheckLogs(
+                              userId,
+                              selectedDateStr,
+                              selectedDayStr,
+                            );
+                          }
+                        },
+                      ),
 
-                    // 복약 루틴 그래프 영역 (다른 파일로 분리함)
+                    // 복약 루틴 그래프 영역
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
@@ -672,7 +681,6 @@ class _MedicationScreenState extends State<MedicationScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // 그래프 (실제 데이터)
                                 FutureBuilder<List<int>>(
                                   future: getFixedWeeklySuccessRates(),
                                   builder: (context, snapshot) {
@@ -731,4 +739,18 @@ class _MedicationScreenState extends State<MedicationScreen> {
       ),
     );
   }
+}
+
+String getRoutineBarText(int? idx) {
+  // TODO: 요일별 더미 문구
+  const dummyTexts = [
+    '복약 성공률이 100%입니다!\n저번주보다 더 잘했어요! 👍',
+    '복약 성공률이 67%로 좋아요!',
+    '복약 성공률이 75%입니다. 거의 성공했어요!',
+    '복약 성공률이 33%입니다. 조금만 더 힘내요!',
+  ];
+  if (idx != null && idx >= 0 && idx < dummyTexts.length) {
+    return dummyTexts[idx];
+  }
+  return '막대를 눌러 확인하세요!';
 }

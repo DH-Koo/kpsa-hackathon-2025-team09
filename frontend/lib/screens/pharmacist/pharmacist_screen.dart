@@ -100,30 +100,6 @@ class PharmacistScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeMessage() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Good morning,',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        const Text(
-          'Pharmacist Hyunju Kim',
-          style: TextStyle(
-            color: Color(0xFF4CAF50),
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
