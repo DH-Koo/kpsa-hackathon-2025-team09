@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../report_screen.dart';
 
 class SimpleEmotionScreen extends StatefulWidget {
   const SimpleEmotionScreen({super.key});
