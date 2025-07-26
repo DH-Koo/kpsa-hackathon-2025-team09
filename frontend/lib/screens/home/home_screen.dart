@@ -48,20 +48,40 @@ class HomeScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                '\n이 컨테이너에',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text(
+                                    '복약상태 확인',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  // TODO: 남은 약 개수 표시
+                                  Text(
+                                    '오늘 복용해야하는 약이 2개 남았어요!',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                '무슨 내용이 들어가면 좋을까요????\n',
-                                style: TextStyle(color: Colors.white70),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                onPressed: () {
+                                  // TODO: 복약 상태 확인 화면으로 이동
+                                },
                               ),
                             ],
                           ),
@@ -76,6 +96,7 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       _HomeNavButton(
                         icon: Symbols.pill,
+                        iconColor: Colors.white,
                         label: '복약 추가',
                         onTap: () {
                           // TODO: 복약 관리 화면에서 바로 복약 추가 바텀시트 띄우기
@@ -83,6 +104,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       _HomeNavButton(
                         icon: Symbols.psychology,
+                        iconColor: Colors.white,
                         label: '감정 진단',
                         onTap: () {
                           // TODO: 감정 진단 세 가지 종류 선택하는 화면으로 이동
@@ -90,6 +112,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       _HomeNavButton(
                         icon: Symbols.music_note,
+                        iconColor: Colors.white,
                         label: '음악 목록',
                         onTap: () {
                           // TODO: 출석 체크 화면으로 이동
@@ -97,6 +120,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       _HomeNavButton(
                         icon: Symbols.store,
+                        iconColor: Colors.white,
                         label: '포인트 상점',
                         onTap: () {
                           // TODO: 포인트 상점 화면으로 이동
@@ -110,7 +134,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 10),
             // 아래 영역은 패딩 없이 전체 너비
             Container(
-              decoration: const BoxDecoration(color: Color(0xFF141414)),
+              decoration: const BoxDecoration(color: Color(0xFF181818)),
               width: double.infinity,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -265,10 +289,12 @@ class HomeScreen extends StatelessWidget {
 // 네비게이션 버튼 위젯
 class _HomeNavButton extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String label;
   final VoidCallback onTap;
   const _HomeNavButton({
     required this.icon,
+    required this.iconColor,
     required this.label,
     required this.onTap,
   });
@@ -286,7 +312,7 @@ class _HomeNavButton extends StatelessWidget {
                 color: Colors.grey[800],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: Colors.white, size: 32),
+              child: Icon(icon, color: iconColor, size: 32),
             ),
             const SizedBox(height: 8),
             Text(
@@ -310,54 +336,71 @@ class _MissionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[850],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          // 왼쪽 세로 바
-          Container(
-            width: 4,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.grey[600],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // 원형 아이콘
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.grey[700],
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Text(
-                '약',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF393939),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // 왼쪽 컬러 바
+              Container(
+                width: 8,
+                decoration: const BoxDecoration(
+                  color: Color.fromARGB(255, 152, 205, 91),
+                  borderRadius: BorderRadius.horizontal(
+                    left: Radius.circular(12),
+                  ),
                 ),
               ),
-            ),
+              Expanded(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                  leading: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[700],
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '약',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Text(
+                      missionText,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.check,
+                    color: const Color.fromARGB(255, 152, 205, 91),
+                    size: 28,
+                  ),
+                  onTap: () {
+                    // TODO: 미션 완료 처리 로직
+                  },
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          // 미션 텍스트
-          Expanded(
-            child: Text(
-              missionText,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-            ),
-          ),
-          // 체크마크
-          Icon(Icons.check, color: Colors.green, size: 20),
-        ],
+        ),
       ),
     );
   }
