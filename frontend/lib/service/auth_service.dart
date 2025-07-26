@@ -185,6 +185,10 @@ class AuthService {
     Map<String, dynamic> data,
   ) async {
     try {
+      // 디버깅: POST 요청 정보 출력
+      print('[POST] endpoint: $endpoint');
+      print('[POST] data: $data');
+
       final response = await _client
           .post(
             Uri.parse('${ApiConfig.baseUrl}$endpoint'),
@@ -193,9 +197,14 @@ class AuthService {
           )
           .timeout(ApiConfig.timeout);
 
+      // 디버깅: 응답 상태 및 body 출력
+      print('[POST] response.statusCode:  ${response.statusCode}');
+      print('[POST] response.body: ${response.body}');
+
       _handleError(response);
       return json.decode(response.body);
     } catch (e) {
+      print('[POST] 네트워크 오류 또는 예외 발생: $e');
       if (e is ApiException) rethrow;
       throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
     }
@@ -243,15 +252,28 @@ class AuthService {
     required String email,
     required String password,
     required String name,
+    required DateTime birth,
   }) async {
-    final userData = {'email': email, 'password': password, 'name': name};
+    final userData = {
+      'email': email,
+      'password': password,
+      'name': name,
+      'birth_date': birth.toIso8601String().split('T')[0], // yyyy-MM-dd 형식
+    };
+
+    // 디버깅: 회원가입 요청 데이터 출력
+    print('[signup] 회원가입 요청: email=$email, name=$name');
 
     try {
       await _post(ApiConfig.userCreate, userData);
 
-      // 회원가입 성공 후 로그인하여 사용자 정보 반환
+      // 디버깅: 회원가입 성공 후 로그인 시도
+      print('[signup] 회원가입 성공, 로그인 시도');
       final loginResponse = await login(email, password);
       final user = User.fromJson(loginResponse);
+
+      // 디버깅: 로그인 성공, 사용자 정보 저장
+      print('[signup] 로그인 성공: user=${user.toJson()}');
 
       // 로컬 저장소에 사용자 정보와 토큰 저장
       await _saveUserToStorage(user);
@@ -259,8 +281,10 @@ class AuthService {
         await _saveTokenToStorage(loginResponse['token']);
       }
 
+      print('[signup] 회원가입 및 로그인 최종 성공');
       return user;
     } catch (e) {
+      print('[signup] 회원가입 실패: $e');
       rethrow;
     }
   }
@@ -318,5 +342,26 @@ class AuthService {
   // 연결 해제
   void dispose() {
     _client.close();
+  }
+
+  /// 회원가입 디버깅용 static 메서드
+  static Future<void> debugSignup() async {
+    final authService = AuthService();
+    final email = 'test ${DateTime.now().millisecondsSinceEpoch}@test.com';
+    final password = '123456';
+    final name = '디버그유저';
+    final birth = DateTime(2000, 01, 01); // 예시 생년월일
+    print('회원가입 시도: ' + email);
+    try {
+      final user = await authService.signup(
+        email: email,
+        password: password,
+        name: name,
+        birth: birth,
+      );
+      print('회원가입 성공: ' + user.toJson().toString());
+    } catch (e) {
+      print('회원가입 실패: $e');
+    }
   }
 }

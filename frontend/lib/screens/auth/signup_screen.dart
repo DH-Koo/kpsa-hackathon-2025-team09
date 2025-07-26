@@ -36,10 +36,18 @@ class _SignupScreenState extends State<SignupScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
+    final birth = DateTime.tryParse(_birthController.text.trim());
+    if (birth == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('생년월일을 yyyy-MM-dd 형식으로 입력하세요.')),
+      );
+      return;
+    }
     final success = await authProvider.signup(
       _emailController.text.trim(),
       _nameController.text.trim(),
       _passwordController.text,
+      birth,
     );
 
     if (success && mounted) {
