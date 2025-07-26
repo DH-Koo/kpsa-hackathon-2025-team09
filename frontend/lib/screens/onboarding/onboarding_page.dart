@@ -6,11 +6,11 @@ class OnboardingPage extends StatelessWidget {
   final int totalPages;
 
   const OnboardingPage({
-    Key? key,
+    super.key,
     required this.data,
     required this.currentPage,
     required this.totalPages,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,22 +25,26 @@ class OnboardingPage extends StatelessWidget {
             height: 200,
             child: Image.asset('assets/images/chatbot.png'),
           ),
-          
+
           const SizedBox(height: 48),
-          
+
           // 메인 텍스트
           if (data.mainText != null)
             Text(
               data.mainText!,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: data.subtitle != null ? const Color(0xFF4CAF50) : Colors.white,
+                color: data.subtitle != null
+                    ? const Color(0xFF4CAF50)
+                    : Colors.white,
                 fontSize: data.subtitle != null ? 32 : 16,
-                fontWeight: data.subtitle != null ? FontWeight.bold : FontWeight.normal,
+                fontWeight: data.subtitle != null
+                    ? FontWeight.bold
+                    : FontWeight.normal,
                 height: 1.5,
               ),
             ),
-          
+
           // 서브타이틀
           if (data.subtitle != null) ...[
             const SizedBox(height: 16),
@@ -54,7 +58,7 @@ class OnboardingPage extends StatelessWidget {
               ),
             ),
           ],
-          
+
           // 페이지네이션 점들
           if (data.showPagination) ...[
             const SizedBox(height: 32),
@@ -68,7 +72,7 @@ class OnboardingPage extends StatelessWidget {
                   height: 8,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: currentPage == index 
+                    color: currentPage == index
                         ? const Color(0xFF4CAF50)
                         : Colors.white.withOpacity(0.3),
                   ),
@@ -98,4 +102,4 @@ class OnboardingPageData {
     required this.showPagination,
     this.buttonText,
   });
-} 
+}

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
 
 class InitialInfoScreen extends StatefulWidget {
-  const InitialInfoScreen({Key? key}) : super(key: key);
+  const InitialInfoScreen({super.key});
 
   @override
   State<InitialInfoScreen> createState() => _InitialInfoScreenState();
@@ -66,7 +64,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: _currentPage > 0 
+                    onPressed: _currentPage > 0
                         ? () => _pageController.previousPage(
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
@@ -74,7 +72,9 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                         : null,
                     icon: Icon(
                       Icons.arrow_back,
-                      color: _currentPage > 0 ? Colors.white : Colors.white.withOpacity(0.3),
+                      color: _currentPage > 0
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.3),
                       size: 24,
                     ),
                   ),
@@ -103,16 +103,13 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                     onPressed: _onSkipPressed,
                     child: const Text(
                       '건너뛰기',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             // 페이지뷰 영역
             Expanded(
               child: PageView.builder(
@@ -124,7 +121,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 },
               ),
             ),
-            
+
             // 하단 버튼 영역
             Padding(
               padding: const EdgeInsets.all(24.0),
@@ -216,7 +213,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
     dynamic pageState = _pageStates[1];
     bool? hasDiagnosis;
     List<String> selectedDiseases = [];
-    
+
     if (pageState is Map) {
       hasDiagnosis = pageState['hasDiagnosis'] as bool?;
       selectedDiseases = List<String>.from(pageState['diseases'] ?? []);
@@ -245,7 +242,10 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '네',
                   hasDiagnosis == true,
-                  () => _updatePageState(1, {'hasDiagnosis': true, 'diseases': selectedDiseases}),
+                  () => _updatePageState(1, {
+                    'hasDiagnosis': true,
+                    'diseases': selectedDiseases,
+                  }),
                 ),
               ),
               const SizedBox(width: 16),
@@ -253,7 +253,10 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 child: _buildSelectionButton(
                   '아니오',
                   hasDiagnosis == false,
-                  () => _updatePageState(1, {'hasDiagnosis': false, 'diseases': []}),
+                  () => _updatePageState(1, {
+                    'hasDiagnosis': false,
+                    'diseases': [],
+                  }),
                 ),
               ),
             ],
@@ -306,7 +309,11 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
     );
   }
 
-  Widget _buildDiseaseCategory(String category, List<String> diseases, List<String> selectedDiseases) {
+  Widget _buildDiseaseCategory(
+    String category,
+    List<String> diseases,
+    List<String> selectedDiseases,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -319,10 +326,12 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        ...diseases.map((disease) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: _buildDiseaseButton(disease, selectedDiseases),
-        )),
+        ...diseases.map(
+          (disease) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _buildDiseaseButton(disease, selectedDiseases),
+          ),
+        ),
       ],
     );
   }
@@ -337,10 +346,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
         } else {
           newSelected.add(disease);
         }
-        _updatePageState(1, {
-          'hasDiagnosis': true,
-          'diseases': newSelected,
-        });
+        _updatePageState(1, {'hasDiagnosis': true, 'diseases': newSelected});
       },
       child: Container(
         width: double.infinity,
@@ -415,22 +421,24 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            ...medications.map((med) => Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                med,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
+            ...medications.map(
+              (med) => Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  med,
+                  style: const TextStyle(color: Colors.black, fontSize: 14),
                 ),
               ),
-            )),
+            ),
           ],
           const SizedBox(height: 16),
           SizedBox(
@@ -467,10 +475,12 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
     dynamic pageState = _pageStates[3];
     bool? hasAllergy;
     List<String> selectedAllergies = [];
-    
+
     if (pageState is Map) {
       hasAllergy = pageState['hasAllergy'] as bool?;
-      selectedAllergies = List<String>.from(pageState['selectedAllergies'] ?? []);
+      selectedAllergies = List<String>.from(
+        pageState['selectedAllergies'] ?? [],
+      );
     } else if (pageState is bool) {
       hasAllergy = pageState;
     }
@@ -533,10 +543,19 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                     _buildAllergyCheckbox('페니실린 (항생제)', selectedAllergies),
                     _buildAllergyCheckbox('타이레놀 (해열진통제)', selectedAllergies),
                     _buildAllergyCheckbox('이부프로펜 (해열진통제)', selectedAllergies),
-                    _buildAllergyCheckbox('라모트리진 / 카바마제핀 등 (정신과 약물)', selectedAllergies),
-                    _buildAllergyCheckbox('갑각류 (예: 새우, 게 등)', selectedAllergies),
+                    _buildAllergyCheckbox(
+                      '라모트리진 / 카바마제핀 등 (정신과 약물)',
+                      selectedAllergies,
+                    ),
+                    _buildAllergyCheckbox(
+                      '갑각류 (예: 새우, 게 등)',
+                      selectedAllergies,
+                    ),
                     _buildAllergyCheckbox('유제품', selectedAllergies),
-                    _buildAllergyCheckbox('꽃가루 / 반려동물 털 / 먼지', selectedAllergies),
+                    _buildAllergyCheckbox(
+                      '꽃가루 / 반려동물 털 / 먼지',
+                      selectedAllergies,
+                    ),
                     _buildAllergyCheckbox('기타 (직접 입력)', selectedAllergies),
                     _buildAllergyCheckbox('알레르기 없음', selectedAllergies),
                   ],
@@ -554,7 +573,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
     bool? hasSupplements;
     List<String> supplements = [];
     String currentInput = '';
-    
+
     if (pageState is Map) {
       hasSupplements = pageState['hasSupplements'] as bool?;
       supplements = List<String>.from(pageState['supplements'] ?? []);
@@ -669,41 +688,49 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              ...supplements.map((supplement) => Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        supplement,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
+              ...supplements.map(
+                (supplement) => Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          supplement,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        List<String> newSupplements = List.from(supplements);
-                        newSupplements.remove(supplement);
-                        _updatePageState(4, {
-                          'hasSupplements': true,
-                          'supplements': newSupplements,
-                          'currentInput': currentInput,
-                        });
-                      },
-                      icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                      iconSize: 20,
-                    ),
-                  ],
+                      IconButton(
+                        onPressed: () {
+                          List<String> newSupplements = List.from(supplements);
+                          newSupplements.remove(supplement);
+                          _updatePageState(4, {
+                            'hasSupplements': true,
+                            'supplements': newSupplements,
+                            'currentInput': currentInput,
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          color: Colors.red,
+                        ),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
                 ),
-              )),
+              ),
             ],
           ],
         ],
@@ -716,7 +743,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
     bool? hasSideEffects;
     List<String> sideEffects = [];
     String currentInput = '';
-    
+
     if (pageState is Map) {
       hasSideEffects = pageState['hasSideEffects'] as bool?;
       sideEffects = List<String>.from(pageState['sideEffects'] ?? []);
@@ -831,41 +858,49 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              ...sideEffects.map((sideEffect) => Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        sideEffect,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
+              ...sideEffects.map(
+                (sideEffect) => Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          sideEffect,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        List<String> newSideEffects = List.from(sideEffects);
-                        newSideEffects.remove(sideEffect);
-                        _updatePageState(5, {
-                          'hasSideEffects': true,
-                          'sideEffects': newSideEffects,
-                          'currentInput': currentInput,
-                        });
-                      },
-                      icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                      iconSize: 20,
-                    ),
-                  ],
+                      IconButton(
+                        onPressed: () {
+                          List<String> newSideEffects = List.from(sideEffects);
+                          newSideEffects.remove(sideEffect);
+                          _updatePageState(5, {
+                            'hasSideEffects': true,
+                            'sideEffects': newSideEffects,
+                            'currentInput': currentInput,
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          color: Colors.red,
+                        ),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
                 ),
-              )),
+              ),
             ],
           ],
         ],
@@ -909,14 +944,18 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
     List<String> options = ['전혀 안 함', '가끔', '주 1-2회', '주 3-4회', '매일'];
 
     return Column(
-      children: options.map((option) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: _buildSelectionButton(
-          option,
-          selectedOption == option,
-          () => _updatePageState(6, option),
-        ),
-      )).toList(),
+      children: options
+          .map(
+            (option) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildSelectionButton(
+                option,
+                selectedOption == option,
+                () => _updatePageState(6, option),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -944,21 +983,35 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
 
   Widget _buildSmokingOptions() {
     String? selectedOption = _pageStates[7];
-    List<String> options = ['전혀 안 함', '가끔', '하루 1-5개비', '하루 6-10개비', '하루 10개비 이상'];
+    List<String> options = [
+      '전혀 안 함',
+      '가끔',
+      '하루 1-5개비',
+      '하루 6-10개비',
+      '하루 10개비 이상',
+    ];
 
     return Column(
-      children: options.map((option) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: _buildSelectionButton(
-          option,
-          selectedOption == option,
-          () => _updatePageState(7, option),
-        ),
-      )).toList(),
+      children: options
+          .map(
+            (option) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildSelectionButton(
+                option,
+                selectedOption == option,
+                () => _updatePageState(7, option),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
-  Widget _buildSelectionButton(String text, bool isSelected, VoidCallback onTap) {
+  Widget _buildSelectionButton(
+    String text,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -983,7 +1036,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
 
   Widget _buildAllergyCheckbox(String allergy, List<String> selectedAllergies) {
     bool isSelected = selectedAllergies.contains(allergy);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
@@ -1002,7 +1055,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
               newSelected.add(allergy);
             }
           }
-          
+
           dynamic currentState = _pageStates[3];
           Map<String, dynamic> newState = {
             'hasAllergy': true,
@@ -1017,7 +1070,9 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
             color: isSelected ? const Color(0xFF4CAF50) : Colors.white,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade300,
+              color: isSelected
+                  ? const Color(0xFF4CAF50)
+                  : Colors.grey.shade300,
               width: 1,
             ),
           ),
@@ -1044,4 +1099,4 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
       ),
     );
   }
-} 
+}

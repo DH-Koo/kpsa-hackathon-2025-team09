@@ -5,7 +5,7 @@ import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final String? selectedRole;
-  
+
   const LoginScreen({super.key, this.selectedRole});
 
   @override
@@ -70,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           // 앱 로고 및 제목
                           Center(
                             child: Image.asset(
-                              'assets/images/character_icon.png',
+                              'assets/images/chatbot.png',
                               width: 200,
                               height: 200,
                               fit: BoxFit.cover,

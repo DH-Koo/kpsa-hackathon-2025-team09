@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
 import 'onboarding_page.dart';
 import 'role_selection_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -17,7 +15,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingPageData> _pages = [
     OnboardingPageData(
-      title: "소개 화면1",
+      title: "",
       mainText: "오늘의 감정을 들려주세요.\nMindTune이 당신만을\n위한 음악을 만들어드립니다.",
       subtitle: null,
       showCloseButton: true,
@@ -25,7 +23,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       buttonText: "다음",
     ),
     OnboardingPageData(
-      title: "소개 화면2",
+      title: "",
       mainText: "오늘의 복약을 잊지 마세요.\nMindTune과 알림부터\n감정·부작용 케어, 약사 연계까지",
       subtitle: null,
       showCloseButton: true,
@@ -33,7 +31,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       buttonText: "다음",
     ),
     OnboardingPageData(
-      title: "소개 화면3",
+      title: "",
       mainText: "오늘의 밤을 준비하세요.\nMindTune이 맞춤형\n수면 케어를 시작합니다.",
       subtitle: null,
       showCloseButton: true,
@@ -64,9 +62,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       // 마지막 페이지에서 역할 선택 화면으로 이동
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const RoleSelectionScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const RoleSelectionScreen()),
       );
     }
   }
@@ -75,9 +71,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     // 온보딩을 건너뛰고 역할 선택 화면으로 이동
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const RoleSelectionScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const RoleSelectionScreen()),
     );
   }
 
@@ -126,7 +120,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
               ),
-            
+
             // 페이지뷰 영역
             Expanded(
               child: PageView.builder(
@@ -142,7 +136,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 },
               ),
             ),
-            
+
             // 하단 버튼 영역
             if (_pages[_currentPage].buttonText != null)
               Padding(
@@ -176,5 +170,3 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 }
-
- 
