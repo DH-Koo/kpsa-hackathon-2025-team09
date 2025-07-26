@@ -244,6 +244,12 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
         final isLoading = chatProvider.isLoading;
+        final hasUserSentMessage = chatProvider.hasUserSentMessage;
+        final hasText = _controller.text.trim().isNotEmpty;
+        
+        // 사용자가 메시지를 보낸 적이 있고, 텍스트가 없을 때만 "그만하기" 버튼 표시
+        final shouldShowStopButton = hasUserSentMessage && !hasText;
+        
         return Container(
           color: const Color(0xFF181F26),
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -265,6 +271,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                       contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     ),
                     onSubmitted: (_) => _sendMessage(),
+                    onChanged: (_) => setState(() {}), // 텍스트 변경 시 UI 업데이트
                     enabled: !isLoading,
                   ),
                 ),
@@ -285,15 +292,32 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                       ),
                     )
                   : GestureDetector(
-                      onTap: _sendMessage,
-                      child: Container(
-                        width: 44,
+                      onTap: hasText ? _sendMessage : (shouldShowStopButton ? _stopChat : null),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        width: hasText ? 44 : (shouldShowStopButton ? 60 : 44),
                         height: 44,
+                        padding: hasText ? null : (shouldShowStopButton ? const EdgeInsets.symmetric(horizontal: 16) : null),
                         decoration: BoxDecoration(
                           color: Color.fromARGB(255, 152, 205, 91),
                           borderRadius: BorderRadius.circular(22),
                         ),
-                        child: const Icon(Icons.arrow_upward, color: Colors.white),
+                        child: hasText 
+                            ? const Icon(Icons.arrow_upward, color: Colors.white)
+                            : shouldShowStopButton
+                                ? Container(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '그만하기',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  )
+                                : const Icon(Icons.arrow_upward, color: Colors.white),
                       ),
                     ),
             ],
@@ -312,6 +336,11 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
       _controller.clear();
       FocusScope.of(context).unfocus();
     }
+  }
+
+  void _stopChat() {
+    // 채팅 종료 로직 - 현재는 단순히 이전 화면으로 돌아감
+    Navigator.of(context).pop();
   }
 }
 
