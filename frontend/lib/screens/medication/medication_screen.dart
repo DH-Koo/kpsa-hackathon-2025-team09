@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/medication/medication_routine_graph.dart';
 import 'package:provider/provider.dart';
 import '../../models/medication.dart';
 import '../../service/medication_service.dart';
@@ -399,6 +400,88 @@ class _MedicationScreenState extends State<MedicationScreen> {
                           );
                         }
                       },
+                    ),
+
+                    // 복약 루틴 그래프 영역 (다른 파일로 분리함)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '이번 주 복약루틴 한 눈에 확인하기',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 24),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 24,
+                              horizontal: 18,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF232329),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 그래프 (실제 데이터)
+                                FutureBuilder<List<int>>(
+                                  future: getFixedWeeklySuccessRates(),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return SizedBox(
+                                        height: 120,
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
+                                    final values = snapshot.data!;
+                                    return RoutineBarGraph(
+                                      values: values,
+                                      onBarTap: (idx) {
+                                        setState(() {
+                                          selectedBarIndex = idx;
+                                        });
+                                      },
+                                      selectedBarIndex: selectedBarIndex,
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF393939),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    getRoutineBarText(selectedBarIndex),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
