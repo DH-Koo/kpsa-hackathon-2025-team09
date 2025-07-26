@@ -221,6 +221,7 @@ class SimpleEmotionScreenState extends State<SimpleEmotionScreen>
                         xEnd: xEnd,
                         yStart: yStart,
                         yEnd: yEnd,
+                        activePointer: _mousePosition,
                       ),
                       // 동그라미 포인터
                       Positioned(
@@ -291,6 +292,49 @@ class SimpleEmotionScreenState extends State<SimpleEmotionScreen>
                         pointerOffset: _mousePosition,
                         xLength: xEnd - xStart,
                         yLength: yEnd - yStart,
+                      ),
+                      // 현재 값 표시 (좌표평면 아래)
+                      Positioned(
+                        bottom: 120,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '긍정성: $_valenceLevel',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Pretendard',
+                                  ),
+                                ),
+                                SizedBox(width: 20),
+                                Text(
+                                  '긴장도: $_arousalLevel',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Pretendard',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -396,7 +440,7 @@ class _PointerRadialPainter extends CustomPainter {
     final radius = size.longestSide * 0.1;
     final gradient = RadialGradient(
       center: Alignment.center,
-      radius: 0.2,
+      radius: 0.05,
       colors: [
         Color.fromARGB(255, 152, 205,91),
         //Color(0xFFB2FF59), // 0.0 - 형광 연두 (중심 밝은 초록)
@@ -697,12 +741,14 @@ class DominanceOnboardingPage extends StatelessWidget {
 class XYAxisBackground extends StatelessWidget {
   final Size screenSize;
   final double xStart, xEnd, yStart, yEnd;
+  final Offset? activePointer;
   const XYAxisBackground({
     required this.screenSize,
     required this.xStart,
     required this.xEnd,
     required this.yStart,
     required this.yEnd,
+    this.activePointer,
   });
 
   @override
@@ -714,6 +760,7 @@ class XYAxisBackground extends StatelessWidget {
         xEnd: xEnd,
         yStart: yStart,
         yEnd: yEnd,
+        activePointer: activePointer,
       ),
     );
   }
@@ -721,15 +768,95 @@ class XYAxisBackground extends StatelessWidget {
 
 class _XYAxisPainter extends CustomPainter {
   final double xStart, xEnd, yStart, yEnd;
+  final Offset? activePointer; // 활성 포인터 위치 추가
   _XYAxisPainter({
     required this.xStart,
     required this.xEnd,
     required this.yStart,
     required this.yEnd,
+    this.activePointer,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
+    // 활성 사분면 배경색 그리기
+    if (activePointer != null) {
+      final double xMid = (xStart + xEnd) / 2;
+      final double yMid = (yStart + yEnd) / 2;
+      
+      // 사분면 판별
+      int activeQuadrant;
+      if (activePointer!.dx > 0 && activePointer!.dy < 0)
+        activeQuadrant = 1;
+      else if (activePointer!.dx < 0 && activePointer!.dy < 0)
+        activeQuadrant = 2;
+      else if (activePointer!.dx < 0 && activePointer!.dy > 0)
+        activeQuadrant = 3;
+      else if (activePointer!.dx > 0 && activePointer!.dy > 0)
+        activeQuadrant = 4;
+      else
+        activeQuadrant = 0; // 중앙에 있을 때
+
+      // 활성 사분면에만 그라데이션 배경색 적용
+      if (activeQuadrant > 0) {
+        Rect quadrantRect;
+        switch (activeQuadrant) {
+          case 1: // 1사분면 (우상단)
+            quadrantRect = Rect.fromLTWH(xMid, yStart, xEnd - xMid, yMid - yStart);
+            break;
+          case 2: // 2사분면 (좌상단)
+            quadrantRect = Rect.fromLTWH(xStart, yStart, xMid - xStart, yMid - yStart);
+            break;
+          case 3: // 3사분면 (좌하단)
+            quadrantRect = Rect.fromLTWH(xStart, yMid, xMid - xStart, yEnd - yMid);
+            break;
+          case 4: // 4사분면 (우하단)
+            quadrantRect = Rect.fromLTWH(xMid, yMid, xEnd - xMid, yEnd - yMid);
+            break;
+          default:
+            quadrantRect = Rect.zero;
+        }
+        
+        if (quadrantRect != Rect.zero) {
+          // X축 그라데이션 그리기
+          final xGradient = LinearGradient(
+            begin: _getXGradientBegin(activeQuadrant),
+            end: _getXGradientEnd(activeQuadrant),
+            colors: [
+              Color(0xFFB2FF59).withOpacity(0.5), // X축 근처 (진한 연두색)
+              Color(0xFFB2FF59).withOpacity(0.1), // 중간
+              Colors.transparent, // X축에서 멀리 (완전 투명)
+            ],
+            stops: [0.0, 0.07, 1.0],
+          );
+          
+          final xPaint = Paint()
+            ..shader = xGradient.createShader(quadrantRect)
+            ..style = PaintingStyle.fill;
+          
+          canvas.drawRect(quadrantRect, xPaint);
+          
+          // Y축 그라데이션 그리기 (X축 그라데이션 위에 오버레이)
+          final yGradient = LinearGradient(
+            begin: _getYGradientBegin(activeQuadrant),
+            end: _getYGradientEnd(activeQuadrant),
+            colors: [
+              Color(0xFFB2FF59).withOpacity(0.5), // Y축 근처 (진한 연두색)
+              Color(0xFFB2FF59).withOpacity(0.1), // 중간
+              Colors.transparent, // Y축에서 멀리 (완전 투명)
+            ],
+            stops: [0.0, 0.07, 1.0],
+          );
+          
+          final yPaint = Paint()
+            ..shader = yGradient.createShader(quadrantRect)
+            ..style = PaintingStyle.fill;
+          
+          canvas.drawRect(quadrantRect, yPaint);
+        }
+      }
+    }
+
     // 격자선 추가
     final Paint gridPaint = Paint()
       ..color = Colors.white.withOpacity(0.25)
@@ -802,8 +929,54 @@ class _XYAxisPainter extends CustomPainter {
     yLabel.paint(canvas, Offset((xStart + xEnd) / 2 + 20, yStart));
   }
 
+  // X축 그라데이션 시작점 결정
+  Alignment _getXGradientBegin(int quadrant) {
+    switch (quadrant) {
+      case 1: return Alignment.centerLeft; // 1사분면: 왼쪽(X축)에서 시작
+      case 2: return Alignment.centerRight; // 2사분면: 오른쪽(X축)에서 시작
+      case 3: return Alignment.centerRight; // 3사분면: 오른쪽(X축)에서 시작
+      case 4: return Alignment.centerLeft; // 4사분면: 왼쪽(X축)에서 시작
+      default: return Alignment.centerLeft;
+    }
+  }
+
+  // X축 그라데이션 끝점 결정
+  Alignment _getXGradientEnd(int quadrant) {
+    switch (quadrant) {
+      case 1: return Alignment.centerRight; // 1사분면: 오른쪽으로
+      case 2: return Alignment.centerLeft; // 2사분면: 왼쪽으로
+      case 3: return Alignment.centerLeft; // 3사분면: 왼쪽으로
+      case 4: return Alignment.centerRight; // 4사분면: 오른쪽으로
+      default: return Alignment.centerRight;
+    }
+  }
+
+  // Y축 그라데이션 시작점 결정
+  Alignment _getYGradientBegin(int quadrant) {
+    switch (quadrant) {
+      case 1: return Alignment.bottomCenter; // 1사분면: 아래(Y축)에서 시작
+      case 2: return Alignment.bottomCenter; // 2사분면: 아래(Y축)에서 시작
+      case 3: return Alignment.topCenter; // 3사분면: 위(Y축)에서 시작
+      case 4: return Alignment.topCenter; // 4사분면: 위(Y축)에서 시작
+      default: return Alignment.bottomCenter;
+    }
+  }
+
+  // Y축 그라데이션 끝점 결정
+  Alignment _getYGradientEnd(int quadrant) {
+    switch (quadrant) {
+      case 1: return Alignment.topCenter; // 1사분면: 위로
+      case 2: return Alignment.topCenter; // 2사분면: 위로
+      case 3: return Alignment.bottomCenter; // 3사분면: 아래로
+      case 4: return Alignment.bottomCenter; // 4사분면: 아래로
+      default: return Alignment.topCenter;
+    }
+  }
+
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _XYAxisPainter oldDelegate) {
+    return oldDelegate.activePointer != activePointer;
+  }
 }
 
 // 사분면별 감정 텍스트 위젯

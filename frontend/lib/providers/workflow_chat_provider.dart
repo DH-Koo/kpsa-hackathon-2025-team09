@@ -54,9 +54,12 @@ class WorkflowChatProvider extends ChangeNotifier {
   }
 
   void resetState() {
+    print('DEBUG: WorkflowChatProvider.resetState() called');
     _messages = [];
     _hasUserSentMessage = false;
     _currentSessionId = null;
+    print('DEBUG: WorkflowChatProvider state reset - messages: ${_messages.length}, hasUserSentMessage: $_hasUserSentMessage, currentSessionId: $_currentSessionId');
     notifyListeners();
+    print('DEBUG: WorkflowChatProvider.resetState() completed');
   }
 } 

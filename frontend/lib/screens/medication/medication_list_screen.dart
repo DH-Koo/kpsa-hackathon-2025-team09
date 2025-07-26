@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'medication_edit_screen.dart';
 
 class MedicationListScreen extends StatelessWidget {
   const MedicationListScreen({super.key});
@@ -6,38 +7,23 @@ class MedicationListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           '복약 정보 목록',
           style: TextStyle(
-            color: Colors.black,
+            color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: () {
-              // 편집 기능 구현
-            },
-            child: const Text(
-              '편집',
-              style: TextStyle(
-                color: Colors.blue,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: Column(
@@ -51,27 +37,34 @@ class MedicationListScreen extends StatelessWidget {
                     _buildSectionTitle('현재 복용 중인 약'),
                     const SizedBox(height: 12),
                     _buildMedicationCard(
+                      context,
                       '타이레놀',
-                      '필요할 때에만',
-                      'assets/images/pill_blue.png',
+                      '월, 화, 수',
+                      '오후 6:00',
+                      'assets/image/pill_blue.png',
+                      '07/26',
+                      '07/28',
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     _buildMedicationCard(
+                      context,
                       '약',
-                      '화, 목, 토\n오후 1:40',
-                      'assets/images/pill_green.png',
+                      '화, 목, 토',
+                      '오후 1:40',
+                      'assets/image/pill_green.png',
+                      '07/20',
+                      '08/15',
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     _buildMedicationCard(
+                      context,
                       '약2',
-                      '매일\n오후 2:50',
-                      'assets/images/pill_red.png',
+                      '매일',
+                      '오후 2:50',
+                      'assets/image/pill_red.png',
+                      '07/15',
+                      '08/30',
                     ),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('현재 복용하지 않는 약'),
-                    const SizedBox(height: 12),
-                    // 복용하지 않는 약이 없을 때 빈 공간
-                    const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -94,68 +87,102 @@ class MedicationListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMedicationCard(String name, String schedule, String imagePath) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade100,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+  Widget _buildMedicationCard(BuildContext context, String name, String weekday, String alarmTime, String imagePath, String startDate, String endDate) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          // context는 StatelessWidget이므로 build 메서드의 context를 사용해야 함
+          // 따라서 _buildMedicationCard 호출 시 context를 전달하도록 수정
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MedicationEditScreen(),
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
               color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(24),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Image.asset(
-                imagePath,
-                width: 32,
-                height: 32,
-                fit: BoxFit.contain,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Image.asset(
+                  imagePath,
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  schedule,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                    height: 1.3,
+                  const SizedBox(height: 4),
+                  Text(
+                    weekday,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                      height: 1.3,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Text(
+                    alarmTime,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$startDate - $endDate',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
-        ],
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey,
+              size: 16,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -178,9 +205,12 @@ class MedicationListScreen extends StatelessWidget {
         ),
         child: const Text(
           '복약 정보 추가하기',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
   }
-}
+} 

@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../../models/medication.dart';
-import '../../service/medication_service.dart';
-import 'package:intl/intl.dart';
 
-class MedicationInputScreen extends StatefulWidget {
-  const MedicationInputScreen({super.key});
+class MedicationEditScreen extends StatefulWidget {
+  const MedicationEditScreen({super.key});
 
   @override
-  State<MedicationInputScreen> createState() => _MedicationInputScreenState();
+  State<MedicationEditScreen> createState() => _MedicationEditScreenState();
 }
 
-class _MedicationInputScreenState extends State<MedicationInputScreen> {
+class _MedicationEditScreenState extends State<MedicationEditScreen> {
   final TextEditingController _medicationNameController = TextEditingController();
   final TextEditingController _medicationPurposeController = TextEditingController();
   final TextEditingController _medicationAmountController = TextEditingController();
@@ -281,100 +278,7 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
     _medicationNameController.dispose();
     _medicationPurposeController.dispose();
     _medicationAmountController.dispose();
-    _numPerTakeController.dispose();
-    _totalDaysController.dispose();
     super.dispose();
-  }
-
-  // 약 등록 메서드
-  Future<void> _registerMedication() async {
-    // 입력값 검증
-    if (_medicationNameController.text.isEmpty) {
-      _showErrorDialog('약 이름을 입력해주세요.');
-      return;
-    }
-
-    if (_numPerTakeController.text.isEmpty) {
-      _showErrorDialog('1회 투여량을 입력해주세요.');
-      return;
-    }
-
-    if (_selectedWeekdays.isEmpty) {
-      _showErrorDialog('복용 요일을 선택해주세요.');
-      return;
-    }
-
-    if (_selectedTimes.isEmpty) {
-      _showErrorDialog('복용 시간을 선택해주세요.');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // 약 루틴 생성
-      final routine = MedicationRoutine(
-        id: 0, // 서버에서 생성
-        userId: userId,
-        name: _medicationNameController.text,
-        description: _medicationPurposeController.text.isEmpty
-            ? null
-            : _medicationPurposeController.text,
-        takeTime: _selectedTimes,
-        numPerTake: int.tryParse(_numPerTakeController.text) ?? 1,
-        numPerDay: _selectedTimes.length,
-        totalDays: int.tryParse(_totalDaysController.text) ?? 30,
-        weekday: _selectedWeekdays,
-        startDay: DateTime.now(),
-        endDay: DateTime.now().add(
-          Duration(days: int.tryParse(_totalDaysController.text) ?? 30),
-        ),
-      );
-
-      // 서버에 등록
-      await _medicationService.createRoutine(routine);
-
-      // 성공 메시지
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${_medicationNameController.text}이(가) 등록되었습니다.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      print('약 등록 실패: $e');
-      if (mounted) {
-        _showErrorDialog('약 등록에 실패했습니다.\n$e');
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  // 에러 다이얼로그 표시
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('오류'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('확인'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -417,12 +321,6 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
                     ),
                     const SizedBox(height: 24),
                     _buildInputSection(
-                      '1회 투여량 (정)',
-                      '숫자로 입력해 주세요',
-                      _numPerTakeController,
-                    ),
-                    const SizedBox(height: 24),
-                    _buildInputSection(
                       '얼마나 드시나요? (정)',
                       '숫자로 입력해 주세요',
                       _medicationAmountController,
@@ -431,9 +329,6 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
                     _buildWeekDaySelector(),
                     const SizedBox(height: 24),
                     _buildDateSelectionSection(),
-                    _buildWeekdaySelection(),
-                    const SizedBox(height: 24),
-                    _buildTimeSelection(),
                   ],
                 ),
               ),
@@ -499,7 +394,6 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
   }
 
   Widget _buildDateSelectionSection() {
-  Widget _buildWeekdaySelection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -693,7 +587,10 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       child: ElevatedButton(
-        onPressed: _isLoading ? null : _registerMedication,
+        onPressed: () {
+          // 다음 단계로 이동하는 로직 구현
+          Navigator.of(context).pop();
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Color.fromARGB(255, 152, 205, 91),
           foregroundColor: Colors.white,
@@ -704,7 +601,7 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
           elevation: 0,
         ),
         child: const Text(
-          '완료 ',
+          '수정하기',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
