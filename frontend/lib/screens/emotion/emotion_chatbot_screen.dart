@@ -49,7 +49,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
   Widget _buildDate() {
     // 실제 날짜는 DateTime.now() 등으로 동적으로 변경 가능
     return Text(
-      '2025년 7월 24일 목요일',
+      '2025년 7월 26일 토요일',
       style: const TextStyle(
         color: Colors.white70,
         fontSize: 16,
@@ -123,7 +123,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                 '안녕!\n처음 만나서 반가워.\n앞으로 무슨 감정이든 나한테 알려줄래?',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 15,
                   height: 1.5,
                 ),
               ),
@@ -290,7 +290,7 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        width: hasText ? 44 : (shouldShowStopButton ? 60 : 44),
+                        width: hasText ? 44 : (shouldShowStopButton ? 100 : 44),
                         height: 44,
                         padding: hasText
                             ? null
@@ -313,8 +313,8 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
                                   '그만하기',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               )

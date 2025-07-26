@@ -304,7 +304,7 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         decoration: BoxDecoration(
           color: Colors.transparent,
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white24,
+            color: isSelected ? Color.fromARGB(255, 152, 205, 91) : Colors.white24,
             width: 1.2,
           ),
           borderRadius: BorderRadius.circular(32),
@@ -313,7 +313,9 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
           text,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white54,
+            color: isSelected
+                ? Color.fromARGB(255, 152, 205, 91)
+                : Colors.white54,
             fontSize: 18,
             fontWeight: FontWeight.w500,
           ),
