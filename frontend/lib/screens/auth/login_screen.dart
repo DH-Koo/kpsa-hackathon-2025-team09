@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           // 앱 로고 및 제목
                           Center(
                             child: Image.asset(
-                              'assets/image/character_icon.png',
+                              'assets/images/character_icon.png',
                               width: 200,
                               height: 200,
                               fit: BoxFit.cover,
