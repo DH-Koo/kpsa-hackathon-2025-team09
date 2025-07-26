@@ -299,6 +299,12 @@ class SimpleEmotionScreenState extends State<SimpleEmotionScreen>
           ),
         );
       case 1:
+        return StressOnboardingPage(
+          key: ValueKey(1),
+          screenSize: screenSize,
+          stressLevel: _stressLevel,
+          onChanged: (v) => setState(() => _stressLevel = v),
+        );
         
       case 2:
 
@@ -397,7 +403,158 @@ class _PointerRadialPainter extends CustomPainter {
   }
 }
 
+class StressGradientBackground extends StatelessWidget {
+  final double fillRatio; // 0.0 ~ 1.0
+  final Size screenSize;
+  const StressGradientBackground({
+    required this.fillRatio,
+    required this.screenSize,
+  });
 
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: screenSize,
+      painter: _StressGradientPainter(
+        fillRatio: fillRatio,
+        screenSize: screenSize,
+      ),
+    );
+  }
+}
+
+class _StressGradientPainter extends CustomPainter {
+  final double fillRatio;
+  final Size screenSize;
+  _StressGradientPainter({required this.fillRatio, required this.screenSize});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double fillHeight = size.height * fillRatio;
+    // 연두색 그라데이션 (PointerRadialBackground에서 사용한 색상과 동일)
+    final gradient = LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [
+        Color.fromARGB(255, 152, 205,91),
+        //Color(0xFFB2FF59), // 형광 연두
+        Color(0xFFCCFF90),
+        Color(0xFFE6F8C9),
+        Color(0xFFDDE5CC),
+        Color(0xFF101F10),
+      ],
+      stops: [0.0, 0.2, 0.4, 0.7, 1.0],
+    );
+    final rect = Rect.fromLTWH(
+      0,
+      size.height - fillHeight,
+      size.width,
+      fillHeight,
+    );
+    final paint = Paint()..shader = gradient.createShader(rect);
+    // 연두색 부분
+    canvas.drawRect(rect, paint);
+    // 나머지 검정색 부분
+    if (fillHeight < size.height) {
+      final blackRect = Rect.fromLTWH(
+        0,
+        0,
+        size.width,
+        size.height - fillHeight,
+      );
+      final blackPaint = Paint()..color = Colors.black;
+      canvas.drawRect(blackRect, blackPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _StressGradientPainter oldDelegate) {
+    return oldDelegate.fillRatio != fillRatio;
+  }
+}
+
+class StressOnboardingPage extends StatelessWidget {
+  final Size screenSize;
+  final int stressLevel;
+  final ValueChanged<int> onChanged;
+  const StressOnboardingPage({
+    Key? key,
+    required this.screenSize,
+    required this.stressLevel,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: screenSize.width,
+      height: screenSize.height,
+      child: Stack(
+        children: [
+          // 배경 그라데이션 차오름
+          StressGradientBackground(
+            fillRatio: stressLevel / 100.0,
+            screenSize: screenSize,
+          ),
+          // 상단 문구
+          Positioned(
+            top: 100,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                '최근 스트레스는 어느정도 이신가요?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'Pretendard',
+                ),
+              ),
+            ),
+          ),
+          // 슬라이더
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$stressLevel',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 24),
+                Container(
+                  width: screenSize.width * 0.7,
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: Color(0xFFB2FF59),
+                      inactiveTrackColor: Colors.grey[800],
+                      thumbColor: Color(0xFFB2FF59),
+                      overlayColor: Color(0xFFB2FF59).withOpacity(0.2),
+                      trackHeight: 8,
+                      thumbShape: RoundSliderThumbShape(enabledThumbRadius: 14),
+                    ),
+                    child: Slider(
+                      min: 0,
+                      max: 100,
+                      divisions: 100,
+                      value: stressLevel.toDouble(),
+                      onChanged: (v) => onChanged(v.round()),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 // X, Y축만 크게 그리는 위젯 추가
 class XYAxisBackground extends StatelessWidget {
