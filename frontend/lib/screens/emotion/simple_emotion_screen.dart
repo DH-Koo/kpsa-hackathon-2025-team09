@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../report_screen.dart';
+import '../../service/api_service.dart';
+import '../../config/api_config.dart';
+import '../../providers/auth_provider.dart';
 
 class SimpleEmotionScreen extends StatefulWidget {
   const SimpleEmotionScreen({super.key});
@@ -21,6 +25,9 @@ class SimpleEmotionScreenState extends State<SimpleEmotionScreen>
   // 마우스 포인터 위치 상태
   Offset _mousePosition = Offset(0, 0);
   bool _isInitialized = false;
+  
+  // 로딩 상태 추가
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +50,32 @@ class SimpleEmotionScreenState extends State<SimpleEmotionScreen>
                   FadeTransition(opacity: animation, child: child),
               child: _buildPage(_pageIndex, screenSize),
             ),
+            // 로딩 인디케이터
+            if (_isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.7),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB2FF59)),
+                        strokeWidth: 3,
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        '음악을 추천하고 있습니다...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Pretendard',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             // 하단 dot indicator & Next/Prev 버튼
             Positioned(
               left: 0,
@@ -356,18 +389,83 @@ class SimpleEmotionScreenState extends State<SimpleEmotionScreen>
           screenSize: screenSize,
           dominanceLevel: _dominanceLevel,
           onChanged: (v) => setState(() => _dominanceLevel = v),
-          onComplete: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => MusicRecommendationScreen(
-                  valenceLevel: _valenceLevel,
-                  arousalLevel: _arousalLevel,
-                  stressLevel: _stressLevel,
-                  dominanceLevel: _dominanceLevel,
+          onComplete: () async {
+            // 로딩 시작
+            setState(() {
+              _isLoading = true;
+            });
+            
+            try {
+              // 현재 사용자 정보 가져오기
+              final authProvider = context.read<AuthProvider>();
+              final currentUser = authProvider.currentUser;
+              
+              if (currentUser == null) {
+                setState(() {
+                  _isLoading = false;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('로그인이 필요합니다.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              
+              // API 요청 데이터 준비
+              final requestData = {
+                'user_id': currentUser.id,
+                'positivity': _valenceLevel,
+                'energy': _arousalLevel,
+                'stress': _stressLevel,
+                'self_control': _dominanceLevel,
+              };
+              
+              // medicineMusic 엔드포인트로 POST 요청
+              final response = await ChatApiService().post<Map<String, dynamic>>(
+                ApiConfig.medicineMusic,
+                requestData,
+              );
+              
+              // 응답에서 text 추출
+              String responseText = '';
+              if (response is Map<String, dynamic> && response['text'] != null) {
+                responseText = response['text'];
+              }
+              
+              // 로딩 종료
+              setState(() {
+                _isLoading = false;
+              });
+              
+              // 성공적으로 요청이 완료되면 다음 화면으로 이동
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => MusicRecommendationScreen(
+                    valenceLevel: _valenceLevel,
+                    arousalLevel: _arousalLevel,
+                    stressLevel: _stressLevel,
+                    dominanceLevel: _dominanceLevel,
+                    responseText: responseText,
+                  ),
                 ),
-              ),
-            );
+              );
+            } catch (e) {
+              // 로딩 종료
+              setState(() {
+                _isLoading = false;
+              });
+              
+              // 에러 처리
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('음악 추천 요청 중 오류가 발생했습니다: ${e.toString()}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
         );
       default:

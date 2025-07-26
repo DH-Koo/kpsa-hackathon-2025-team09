@@ -17,6 +17,7 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
   int? _selectedIndex;
   bool _hasInitialized = false;
   List<String> _responseList = [];
+  final TextEditingController _customInputController = TextEditingController();
 
   @override
   void initState() {
@@ -27,6 +28,12 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         _hasInitialized = true;
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _customInputController.dispose();
+    super.dispose();
   }
 
   void _sendInitialMessage() {
@@ -54,6 +61,10 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         if (responseList.isNotEmpty && responseList != _responseList) {
           _responseList = responseList;
         }
+
+        // 로딩 상태 확인
+        final bool isLoading = chatProvider.isLoading;
+        
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
@@ -71,42 +82,51 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
               child: Column(
                 children: [
                   Expanded(
-                    child: _responseList.isEmpty
-                        ? _buildLoadingView()
-                        : SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const SizedBox(height: 24),
-                                Text(
-                                  _responseList[0],
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.4,
+                    child: SingleChildScrollView(
+                      child: _responseList.isEmpty && !isLoading
+                          ? _buildLoadingView()
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // 질문 텍스트 또는 로딩 텍스트
+                                  Text(
+                                    isLoading ? '생각 중...' : _responseList.isNotEmpty ? _responseList[0] : '',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.4,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 48),
-                                ...List.generate(
-                                  _responseList.length > 1
-                                      ? _responseList.length - 1
-                                      : 0,
-                                  (i) => Column(
-                                    children: [
-                                      _buildOptionButton(
-                                        i,
-                                        _responseList[i + 1],
+                                  const SizedBox(height: 48),
+                                  // 로딩 중이 아닐 때만 옵션 버튼들 표시
+                                  if (!isLoading) ...[
+                                    ...List.generate(
+                                      _responseList.length > 1
+                                          ? _responseList.length - 1
+                                          : 0,
+                                      (i) => Column(
+                                        children: [
+                                          _buildOptionButton(
+                                            i,
+                                            _responseList[i + 1],
+                                          ),
+                                          const SizedBox(height: 24),
+                                        ],
                                       ),
-                                      const SizedBox(height: 24),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                              ],
+                                    ),
+                                    // 직접 입력 카드
+                                    _buildCustomInputCard(),
+                                    const SizedBox(height: 24),
+                                  ],
+                                ],
+                              ),
                             ),
-                          ),
+                    ),
                   ),
                   Row(
                     children: [
@@ -132,14 +152,22 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _selectedIndex != null
+                          onPressed: ((_selectedIndex != null || _customInputController.text.isNotEmpty) && !isLoading)
                               ? () {
-                                  // 선택한 옵션의 텍스트를 content로 하여 메시지 전송
-                                  if (_selectedIndex != null &&
+                                  String selectedText = '';
+                                  
+                                  // 직접 입력이 있는 경우
+                                  if (_customInputController.text.isNotEmpty) {
+                                    selectedText = _customInputController.text;
+                                  }
+                                  // 옵션 선택이 있는 경우
+                                  else if (_selectedIndex != null &&
                                       _responseList.length >
                                           _selectedIndex! + 1) {
-                                    final selectedText =
-                                        _responseList[_selectedIndex! + 1];
+                                    selectedText = _responseList[_selectedIndex! + 1];
+                                  }
+                                  
+                                  if (selectedText.isNotEmpty) {
                                     final authProvider = context
                                         .read<AuthProvider>();
                                     final userId =
@@ -156,13 +184,14 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
                                     // 선택 상태 초기화
                                     setState(() {
                                       _selectedIndex = null;
+                                      _customInputController.clear();
                                     });
                                   }
                                 }
-                              : () {},
+                              : null, // 로딩 중이거나 아무것도 선택하지 않았을 때 비활성화
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _selectedIndex != null
-                                ? const Color(0xFF232B34)
+                            backgroundColor: ((_selectedIndex != null || _customInputController.text.isNotEmpty) && !isLoading)
+                                ? Color.fromARGB(255, 152, 205, 91) 
                                 : const Color(0xFF232B34).withOpacity(0.5),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
@@ -173,7 +202,7 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
                           child: Text(
                             '다음 단계',
                             style: TextStyle(
-                              color: _selectedIndex != null
+                              color: ((_selectedIndex != null || _customInputController.text.isNotEmpty) && !isLoading)
                                   ? Colors.white
                                   : Colors.white24,
                               fontSize: 16,
@@ -198,12 +227,15 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
     try {
       // 전체 응답이 JSON 객체인지 확인 (session_id 포함)
       if (message.startsWith('{') && message.endsWith('}')) {
+        print('check point 1');
         final Map<String, dynamic> responseData = json.decode(message);
         final response = responseData['response'];
+        print(responseData);
         final isFinalAnswer = responseData['is_final_answer'] ?? false;
 
+        print('is_final_answer: $isFinalAnswer');
         // is_final_answer가 true인 경우 WorkflowChatProvider 상태 초기화 후 EmotionReportScreen으로 이동
-        if (isFinalAnswer) {
+        if (response[0] is List) {
           // WorkflowChatProvider 상태 초기화
           print('!!!!!!!!!!!!!!!!!!!!!!!!!resetState!!!!!!!!!!!!!!!!!!!!!!!');
           print('DEBUG: About to reset WorkflowChatProvider state');
@@ -215,7 +247,7 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => EmotionReportScreen(
-                  finalResponse: response,
+                  finalResponse: response[0] ,
                 ),
               ),
             );
@@ -304,7 +336,7 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         decoration: BoxDecoration(
           color: Colors.transparent,
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.white24,
+            color: isSelected ? Color.fromARGB(255, 152, 205, 91) : Colors.white24,
             width: 1.2,
           ),
           borderRadius: BorderRadius.circular(32),
@@ -313,11 +345,55 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
           text,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white54,
+            color: isSelected
+                ? Colors.white
+                : Colors.white54,
             fontSize: 18,
             fontWeight: FontWeight.w500,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCustomInputCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(
+          color: Colors.white24,
+          width: 1.2,
+        ),
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: TextField(
+        controller: _customInputController,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+        ),
+        textAlign: TextAlign.center,
+        decoration: const InputDecoration(
+          hintText: '직접 입력하기',
+          hintStyle: TextStyle(
+            color: Colors.white54,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16),
+        ),
+        onChanged: (value) {
+          // 직접 입력 시 다른 옵션 선택 해제
+          if (value.isNotEmpty) {
+            setState(() {
+              _selectedIndex = null;
+            });
+          }
+        },
       ),
     );
   }

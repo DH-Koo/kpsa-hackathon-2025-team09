@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../auth/login_screen.dart';
 import '../pharmacist/pharmacist_screen.dart';
+import '../doctor_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -11,6 +12,12 @@ class RoleSelectionScreen extends StatelessWidget {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const PharmacistScreen()),
+      );
+    } else if (role == "doctor") {
+      // 의사를 선택한 경우 로그인 없이 바로 doctor_screen으로 이동
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DoctorScreen()),
       );
     } else {
       // 다른 역할을 선택한 경우 기존처럼 로그인 화면으로 이동
