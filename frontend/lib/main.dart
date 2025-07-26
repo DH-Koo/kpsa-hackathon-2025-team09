@@ -84,7 +84,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
       builder: (context, authProvider, child) {
         if (authProvider.isLoading) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            backgroundColor: Colors.black,
+            body: Center(child: CircularProgressIndicator(color: Colors.white)),
           );
         }
 

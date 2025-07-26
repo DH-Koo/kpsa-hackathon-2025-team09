@@ -445,25 +445,20 @@ class _MedicationScreenState extends State<MedicationScreen> {
                               // 무한 스와이프처럼 보이게 itemCount 없이
                               onPageChanged: (index) {
                                 setState(() {
-                                  weekStartDate = DateTime.now()
+                                  final newWeekStartDate = DateTime.now()
                                       .subtract(
                                         Duration(
                                           days: DateTime.now().weekday - 1,
                                         ),
                                       )
                                       .add(Duration(days: 7 * (index - 1000)));
-                                  if (index > _currentPageIndex) {
-                                    // 오른쪽(미래 주) → 월요일
-                                    selectedDayIndex = 0;
-                                    selectedDate = weekStartDate;
-                                  } else if (index < _currentPageIndex) {
-                                    // 왼쪽(과거 주) → 일요일
-                                    selectedDayIndex = 6;
-                                    selectedDate = weekStartDate.add(
-                                      const Duration(days: 6),
-                                    );
-                                  }
+                                  weekStartDate = newWeekStartDate;
+
+                                  // 스와이프할 때는 selectedDate를 조정하지 않음
+                                  // 사용자가 직접 날짜를 선택할 때만 변경됨
                                   _currentPageIndex = index; // 인덱스 갱신
+
+                                  // 현재 선택된 날짜에 대한 체크로그 로드
                                   final selectedDateStr = DateFormat(
                                     'yyyy-MM-dd',
                                   ).format(selectedDate);
@@ -623,6 +618,8 @@ class _MedicationScreenState extends State<MedicationScreen> {
                             weekStartDate = monday;
                             selectedDayIndex = picked.weekday - 1;
                             selectedDate = picked;
+                            _currentPageIndex =
+                                1000 + weekDiff; // 현재 페이지 인덱스도 업데이트
                           });
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             _pageController.jumpToPage(1000 + weekDiff);
