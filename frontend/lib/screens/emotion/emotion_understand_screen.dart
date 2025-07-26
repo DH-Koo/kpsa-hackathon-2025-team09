@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
-import 'package:mindtune_practice/screens/emotion/simple_emotion_screen.dart';
-import 'package:mindtune_practice/screens/emotion/emotion_chatbot_screen.dart';
-import 'package:mindtune_practice/screens/emotion/emotion_workflow_screen.dart';
+import 'simple_emotion_screen.dart';
+import 'emotion_chatbot_screen.dart';
+import 'emotion_workflow_screen.dart';
 
 class EmotionUnderstandScreen extends StatelessWidget {
   const EmotionUnderstandScreen({Key? key}) : super(key: key);
