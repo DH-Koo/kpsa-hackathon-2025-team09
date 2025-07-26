@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'screens/navigationbar_screen.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/onboarding/onboarding_screen.dart';
+import 'screens/onboarding/initial_info_screen.dart';
 import 'providers/chat_provider.dart';
+import 'providers/workflow_chat_provider.dart';
 import 'providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'providers/medication_check_log_provider.dart';
@@ -15,6 +18,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => WorkflowChatProvider()),
         ChangeNotifierProvider(create: (_) => MedicationCheckLogProvider()),
       ],
       child: MyApp(),
@@ -41,7 +45,10 @@ class MyApp extends StatelessWidget {
         Locale('en', ''), // 영어
       ],
       home: const AuthWrapper(),
-      routes: {'/main': (context) => const NavigationScreen()},
+      routes: {
+        '/main': (context) => const NavigationScreen(),
+        '/initial-info': (context) => const InitialInfoScreen(),
+      },
     );
   }
 }
@@ -86,7 +93,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
           return const NavigationScreen();
         }
 
-        return const LoginScreen();
+        // 온보딩을 먼저 보여주고, 그 다음에 로그인 화면으로 이동
+        return const OnboardingScreen();
       },
     );
   }

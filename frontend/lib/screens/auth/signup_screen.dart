@@ -51,8 +51,8 @@ class _SignupScreenState extends State<SignupScreen> {
     );
 
     if (success && mounted) {
-      // 회원가입 성공 시 메인 화면으로 이동
-      Navigator.of(context).pushReplacementNamed('/main');
+      // 회원가입 성공 시 초기 정보 입력 화면으로 이동
+      Navigator.of(context).pushReplacementNamed('/initial-info');
     }
   }
 

@@ -95,7 +95,6 @@ class ChatApiService {
             body: json.encode(data),
           )
           .timeout(ApiConfig.timeout);
-      print(response.body);
       _handleError(response);
       final parsedResponse = json.decode(response.body) as T;
       return parsedResponse;
@@ -156,13 +155,11 @@ class ChatApiService {
     if (sessionId != null) {
       data['session_id'] = sessionId;
     }
-    print(data);
     try {
       final response = await ChatApiService().post<dynamic>(
         ApiConfig.postChatSession,
         data,
       );
-      print(response);
       // 응답이 List인 경우와 Map인 경우를 모두 처리
       if (response is List) {
         // List인 경우 첫 번째 요소의 'response' 필드를 사용하거나 전체를 문자열로 변환
