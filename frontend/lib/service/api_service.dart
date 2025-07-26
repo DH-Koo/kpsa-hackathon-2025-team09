@@ -98,7 +98,7 @@ class ChatApiService {
             body: json.encode(data),
           )
           .timeout(ApiConfig.timeout);
-
+      print(response);
       _handleError(response);
       final parsedResponse = json.decode(response.body) as T;
       return parsedResponse;
@@ -141,20 +141,40 @@ class ChatApiService {
     }
   }
   
-  static Future<String> sendMessageToBot(String userInput, int userId, bool isWorkflow) async {
+  static Future<String> sendMessageToBot(String userInput, int userId, bool isWorkflow, int? sessionId) async {
     final data = <String, dynamic>{
       'user_input': userInput,
       'user_id': userId,
       'is_workflow': isWorkflow ?? false,
       'character_id': 0,
     };
-    print('[sendMessageToBot] 요청 데이터: $data');
+    
+    // session_id가 있으면 추가
+    if (sessionId != null) {
+      data['session_id'] = sessionId;
+    }
+    print(data);
     try {
-      final response = await ChatApiService().post<Map<String, dynamic>>(ApiConfig.postChatSession, data);
-      print('[sendMessageToBot] 응답 데이터: $response');
-      return response['response'] ?? '';
+      final response = await ChatApiService().post<dynamic>(ApiConfig.postChatSession, data);
+      print(response);
+      // 응답이 List인 경우와 Map인 경우를 모두 처리
+      if (response is List) {
+        // List인 경우 첫 번째 요소의 'response' 필드를 사용하거나 전체를 문자열로 변환
+        if (response.isNotEmpty && response.first is Map) {
+          final firstItem = response.first as Map;
+          final responseText = firstItem['response'];
+          return responseText?.toString() ?? firstItem.toString();
+        } else {
+          return response.toString();
+        }
+      } else if (response is Map) {
+        // Map인 경우 전체 객체를 JSON 문자열로 반환 (session_id 포함)
+        return json.encode(response);
+      } else {
+        // 그 외의 경우 문자열로 변환
+        return response.toString();
+      }
     } catch (e) {
-      print('[sendMessageToBot] 에러 발생: $e');
       rethrow;
     }
   }
