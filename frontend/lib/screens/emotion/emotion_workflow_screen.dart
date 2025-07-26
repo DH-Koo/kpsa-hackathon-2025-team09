@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/chat_provider.dart';
+import '../../providers/workflow_chat_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/chat_message.dart';
 import 'dart:convert'; // Added for json.decode
@@ -32,12 +32,12 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
   void _sendInitialMessage() {
     final authProvider = context.read<AuthProvider>();
     final userId = authProvider.currentUser?.id ?? 0;
-    context.read<ChatProvider>().sendMessage('start!', userId, true);
+    context.read<WorkflowChatProvider>().sendMessage('start!', userId, true);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChatProvider>(
+    return Consumer<WorkflowChatProvider>(
       builder: (context, chatProvider, child) {
         // 마지막 model 메시지에서 response 리스트 파싱
         final lastModelMsg = chatProvider.messages.lastWhere(
@@ -145,7 +145,7 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
                                     final userId =
                                         authProvider.currentUser?.id ?? 0;
                                     final chatProvider = context
-                                        .read<ChatProvider>();
+                                        .read<WorkflowChatProvider>();
                                     chatProvider.sendMessage(
                                       selectedText,
                                       userId,
@@ -202,8 +202,12 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         final response = responseData['response'];
         final isFinalAnswer = responseData['is_final_answer'] ?? false;
 
-        // is_final_answer가 true인 경우 EmotionReportScreen으로 이동
+        // is_final_answer가 true인 경우 WorkflowChatProvider 상태 초기화 후 EmotionReportScreen으로 이동
         if (isFinalAnswer) {
+          // WorkflowChatProvider 상태 초기화
+          print('!!!!!!!!!!!!!!!!!!!!!!!!!resetState!!!!!!!!!!!!!!!!!!!!!!!');
+          context.read<WorkflowChatProvider>().resetState();
+          
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(

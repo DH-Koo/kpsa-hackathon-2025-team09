@@ -4,7 +4,9 @@ import '../../providers/auth_provider.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String? selectedRole;
+  
+  const LoginScreen({super.key, this.selectedRole});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
