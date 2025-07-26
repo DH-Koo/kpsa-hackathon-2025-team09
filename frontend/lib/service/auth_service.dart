@@ -299,23 +299,6 @@ class AuthService {
 
   // 로그인
   Future<Map<String, dynamic>> login(String email, String password) async {
-    // 더미 계정 로그인 (임시)
-    if (email == 'test@test.com' && password == '123456') {
-      final dummyUser = User(
-        id: 1,
-        email: email,
-        name: '전성준',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        birth: DateTime(2002, 05, 20),
-        job: '학생',
-      );
-      final dummyToken = 'dummy_token_123';
-      await _saveUserToStorage(dummyUser);
-      await _saveTokenToStorage(dummyToken);
-      return {'user': dummyUser.toJson(), 'token': dummyToken, 'success': true};
-    }
-
     final loginData = {'email': email, 'password': password};
     final response = await _post(ApiConfig.userLogin, loginData);
 
@@ -352,24 +335,9 @@ class AuthService {
     _client.close();
   }
 
-  /// 회원가입 디버깅용 static 메서드
+  /// 회원가입 디버깅용 static 메서드 (더미 데이터 제거됨)
   static Future<void> debugSignup() async {
-    final authService = AuthService();
-    final email = 'test ${DateTime.now().millisecondsSinceEpoch}@test.com';
-    final password = '123456';
-    final name = '디버그유저';
-    final birth = DateTime(2000, 01, 01); // 예시 생년월일
-    print('회원가입 시도: ' + email);
-    try {
-      final user = await authService.signup(
-        email: email,
-        password: password,
-        name: name,
-        birth: birth,
-      );
-      print('회원가입 성공: ' + user.toJson().toString());
-    } catch (e) {
-      print('회원가입 실패: $e');
-    }
+    print('디버그 회원가입 기능이 제거되었습니다.');
+    print('실제 회원가입을 사용해주세요.');
   }
 }

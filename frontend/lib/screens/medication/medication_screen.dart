@@ -594,6 +594,74 @@ class _MedicationScreenState extends State<MedicationScreen> {
                       ),
                     ),
 
+                    // 알림 정보 섹션
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.alarm,
+                                color: Colors.green.shade400,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '복약 알림',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          FutureBuilder<List<MedicationRoutine>>(
+                            future: routinesFuture,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade900,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.info_outline,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '등록된 복약이 없습니다',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              final routines = snapshot.data!;
+
+                              return Column(
+                                children: routines.map((routine) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                  );
+                                }).toList(),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
                     // 오늘의 복약 리스트 카드
                     if (routinesFuture != null)
                       MedicationDayCard(
@@ -601,7 +669,6 @@ class _MedicationScreenState extends State<MedicationScreen> {
                         weekDates: weekDates,
                         selectedDayIndex: selectedDayIndex,
                         selectedDayStr: selectedDayStr,
-                        checkLogProvider: checkLogProvider,
                         userId: userId,
                         selectedDate: selectedDate,
                         onDateSelected: (currentDate) async {
@@ -742,15 +809,9 @@ class _MedicationScreenState extends State<MedicationScreen> {
 }
 
 String getRoutineBarText(int? idx) {
-  // TODO: 요일별 더미 문구
-  const dummyTexts = [
-    '복약 성공률이 100%입니다!\n저번주보다 더 잘했어요! 👍',
-    '복약 성공률이 67%로 좋아요!',
-    '복약 성공률이 75%입니다. 거의 성공했어요!',
-    '복약 성공률이 33%입니다. 조금만 더 힘내요!',
-  ];
-  if (idx != null && idx >= 0 && idx < dummyTexts.length) {
-    return dummyTexts[idx];
+  if (idx != null && idx >= 0 && idx < 7) {
+    final days = ['월', '화', '수', '목', '금', '토', '일'];
+    return '${days[idx]}요일 복약 성공률을 확인하세요!';
   }
   return '막대를 눌러 확인하세요!';
 }

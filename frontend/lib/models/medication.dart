@@ -83,6 +83,35 @@ class MedicationRoutine {
       }
     }
 
+    // 필수 필드 검증
+    if (json['id'] == null) {
+      throw FormatException('id 필드가 null입니다');
+    }
+    if (json['user_id'] == null) {
+      throw FormatException('user_id 필드가 null입니다');
+    }
+    if (json['name'] == null) {
+      throw FormatException('name 필드가 null입니다');
+    }
+    if (json['take_time'] == null) {
+      throw FormatException('take_time 필드가 null입니다');
+    }
+    if (json['num_per_take'] == null) {
+      throw FormatException('num_per_take 필드가 null입니다');
+    }
+    if (json['num_per_day'] == null) {
+      throw FormatException('num_per_day 필드가 null입니다');
+    }
+    if (json['total_days'] == null) {
+      throw FormatException('total_days 필드가 null입니다');
+    }
+    if (json['start_day'] == null) {
+      throw FormatException('start_day 필드가 null입니다');
+    }
+    if (json['end_day'] == null) {
+      throw FormatException('end_day 필드가 null입니다');
+    }
+
     return MedicationRoutine(
       id: json['id'],
       userId: json['user_id'],

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class MedicationEditScreen extends StatefulWidget {
@@ -10,9 +9,12 @@ class MedicationEditScreen extends StatefulWidget {
 }
 
 class _MedicationEditScreenState extends State<MedicationEditScreen> {
-  final TextEditingController _medicationNameController = TextEditingController();
-  final TextEditingController _medicationPurposeController = TextEditingController();
-  final TextEditingController _medicationAmountController = TextEditingController();
+  final TextEditingController _medicationNameController =
+      TextEditingController();
+  final TextEditingController _medicationPurposeController =
+      TextEditingController();
+  final TextEditingController _medicationAmountController =
+      TextEditingController();
 
   // 복용 시작일과 종료일 변수 추가
   DateTime _startDate = DateTime.now();
@@ -24,7 +26,9 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        DateTime tempSelected = isStartDate ? _startDate : (_endDate ?? DateTime.now());
+        DateTime tempSelected = isStartDate
+            ? _startDate
+            : (_endDate ?? DateTime.now());
         return SafeArea(
           child: StatefulBuilder(
             builder: (context, setModalState) {
@@ -171,28 +175,30 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
                           final isWeekday =
                               day.weekday >= DateTime.monday &&
                               day.weekday <= DateTime.friday;
-                          final isPastDay = !isStartDate && day.isBefore(DateTime.now());
+                          final isPastDay =
+                              !isStartDate && day.isBefore(DateTime.now());
                           return Center(
                             child: Text(
                               '${day.day}',
                               style: TextStyle(
-                                color: isPastDay 
-                                    ? Colors.grey[600] 
+                                color: isPastDay
+                                    ? Colors.grey[600]
                                     : (isWeekday
-                                        ? Colors.white
-                                        : Colors.grey[400]), // 주중/주말
+                                          ? Colors.white
+                                          : Colors.grey[400]), // 주중/주말
                               ),
                             ),
                           );
                         },
                         outsideBuilder: (context, day, focusedDay) {
-                          final isPastDay = !isStartDate && day.isBefore(DateTime.now());
+                          final isPastDay =
+                              !isStartDate && day.isBefore(DateTime.now());
                           return Center(
                             child: Text(
                               '${day.day}',
                               style: TextStyle(
-                                color: isPastDay 
-                                    ? Colors.grey[600] 
+                                color: isPastDay
+                                    ? Colors.grey[600]
                                     : Colors.grey[700], // 해당 월이 아니면 더 진한 회색
                               ),
                             ),
@@ -230,7 +236,9 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
                               ),
                               foregroundColor: Colors.white,
                             ),
-                            onPressed: (!isStartDate && tempSelected.isBefore(DateTime.now()))
+                            onPressed:
+                                (!isStartDate &&
+                                    tempSelected.isBefore(DateTime.now()))
                                 ? null
                                 : () {
                                     Navigator.pop(context, tempSelected);
@@ -264,10 +272,6 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
   String _formatDate(DateTime date) {
     return '${date.year}년 ${date.month.toString().padLeft(2, '0')}월 ${date.day.toString().padLeft(2, '0')}일';
   }
-
-  // 복용 요일 드롭다운 관련 변수 및 위젯 추가
-  String _selectedDayOption = '매일';
-  final List<String> _dayOptions = ['매일', '특정 요일에만'];
 
   // 요일 선택 관련 변수 추가
   final Set<int> _selectedDays = <int>{};
@@ -352,7 +356,11 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
     );
   }
 
-  Widget _buildInputSection(String title, String placeholder, TextEditingController controller) {
+  Widget _buildInputSection(
+    String title,
+    String placeholder,
+    TextEditingController controller,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -374,10 +382,7 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
             controller: controller,
             decoration: InputDecoration(
               hintText: placeholder,
-              hintStyle: TextStyle(
-                color: Colors.grey.shade500,
-                fontSize: 16,
-              ),
+              hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(16),
             ),
@@ -471,7 +476,9 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
                       _endDate != null ? _formatDate(_endDate!) : '선택',
                       style: TextStyle(
                         fontSize: 16,
-                        color: _endDate != null ? Colors.black : Colors.grey.shade500,
+                        color: _endDate != null
+                            ? Colors.black
+                            : Colors.grey.shade500,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -521,9 +528,12 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
                 });
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: _selectedDays.length == 7 
+                  color: _selectedDays.length == 7
                       ? Color.fromARGB(255, 152, 205, 91)
                       : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(6),
@@ -533,8 +543,8 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: _selectedDays.length == 7 
-                        ? Colors.white 
+                    color: _selectedDays.length == 7
+                        ? Colors.white
                         : Colors.grey.shade700,
                   ),
                 ),
@@ -561,7 +571,9 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
                 width: 45,
                 height: 45,
                 decoration: BoxDecoration(
-                  color: isSelected ? Color.fromARGB(255, 152, 205, 91): Colors.grey.shade200,
+                  color: isSelected
+                      ? Color.fromARGB(255, 152, 205, 91)
+                      : Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
@@ -602,12 +614,9 @@ class _MedicationEditScreenState extends State<MedicationEditScreen> {
         ),
         child: const Text(
           '수정하기',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
-} 
+}

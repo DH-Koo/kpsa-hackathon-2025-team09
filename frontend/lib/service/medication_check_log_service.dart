@@ -13,15 +13,12 @@ class MedicationCheckLogService {
   ) async {
     try {
       final endpoint = ApiConfig.medicineOfDay(userId, day, weekday);
+      print('[fetchMedicineOfDay] 호출할 엔드포인트: $endpoint');
+
       final data = await _api.get<List<dynamic>>(endpoint);
       return data.map((e) => MedicationCheckLog.fromJson(e)).toList();
     } catch (e, stack) {
       print('[fetchMedicineOfDay] 에러 발생: $e\n$stack');
-      // 복약 체크 로그가 없을 때는 빈 배열 반환
-      if (e.toString().contains('404') || e.toString().contains('500')) {
-        print('[fetchMedicineOfDay] 복약 체크 로그가 없거나 서버 오류, 빈 배열 반환');
-        return [];
-      }
       rethrow;
     }
   }
@@ -31,7 +28,6 @@ class MedicationCheckLogService {
     int userId,
     String day,
     int medicineId,
-    List<int> time,
   ) async {
     try {
       final endpoint = ApiConfig.medicineOfDay(
@@ -39,7 +35,7 @@ class MedicationCheckLogService {
         day,
         medicineId.toString(),
       );
-      final data = await _api.put(endpoint, {"time": time});
+      final data = await _api.put(endpoint, {'medicine_of_day_id': medicineId});
       return MedicationCheckLog.fromJson(data);
     } catch (e, stack) {
       print('[toggleMedicineCheck] 에러 발생: $e\n$stack');
