@@ -39,7 +39,6 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 상단 복약상태/음악 추천 박스
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -90,8 +89,8 @@ class HomeScreen extends StatelessWidget {
                         },
                       ),
                       _HomeNavButton(
-                        icon: Symbols.calendar_month,
-                        label: '출석 체크',
+                        icon: Symbols.music_note,
+                        label: '음악 목록',
                         onTap: () {
                           // TODO: 출석 체크 화면으로 이동
                         },
@@ -111,13 +110,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 10),
             // 아래 영역은 패딩 없이 전체 너비
             Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF141414),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
-                ),
-              ),
+              decoration: const BoxDecoration(color: Color(0xFF141414)),
               width: double.infinity,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -128,73 +121,136 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                    // 복약 알림 카드 2x2 그리드
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        // 상단(앱바+상단영역+패딩 등) 높이 대략 260으로 가정
-                        final double availableHeight =
-                            MediaQuery.of(context).size.height - 400;
-                        final double cardHeight =
-                            (availableHeight - 12) / 2; // 12는 중간 간격
-                        return Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _HomeBigCard(
-                                    icon: null,
-                                    label: '오늘 복약률\n30%',
-                                    onTap: () {
-                                      // TODO: 복약 관리 화면으로 이동
-                                    },
-                                    height: cardHeight,
-                                    medicationRate: 30,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _HomeBigCard(
-                                    icon: Symbols.bar_chart,
-                                    label: '추이 분석',
-                                    onTap: () {
-                                      // TODO: 복약, 감정, 수면 추이 분석 다 모아놓은 화면으로 이동
-                                    },
-                                    height: cardHeight,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _HomeBigCard(
-                                    icon: Symbols.flag,
-                                    label: '미션',
-                                    onTap: () {
-                                      // TODO: 미션 화면으로 이동
-                                    },
-                                    height: cardHeight,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _HomeBigCard(
-                                    icon: Symbols.book,
-                                    label: '마음 일기',
-                                    onTap: () {
-                                      // TODO: 마음 일기 화면으로 이동
-                                    },
-                                    height: cardHeight,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
+                    // 건강 미션 헤더
+                    const Text(
+                      '건강 미션으로 포인트 받기!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // 미션 리스트
+                    Column(
+                      children: [
+                        _MissionCard(
+                          missionText: '오늘치 모든 약을 먹었어요!',
+                          isCompleted: true,
+                        ),
+                        const SizedBox(height: 8),
+                        _MissionCard(
+                          missionText: '오늘 내 감정을 살펴봤어요.',
+                          isCompleted: true,
+                        ),
+                        const SizedBox(height: 8),
+                        _MissionCard(
+                          missionText: '건강한 잠을 잤어요~',
+                          isCompleted: true,
+                        ),
+                        const SizedBox(height: 8),
+                        _MissionCard(
+                          missionText: '오늘 내 마음을 기록해요.',
+                          isCompleted: true,
+                        ),
+                        const SizedBox(height: 8),
+                        _MissionCard(
+                          missionText: 'MindTune으로 나를 보살펴요',
+                          isCompleted: true,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 28),
+                    // 상단 복약상태/음악 추천 박스
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 헤더
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              '오늘의 추천 플레이리스트',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          '지금 기분이 어떠신가요?',
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          '00님의 기분에 맞는 음악을 추천해드릴게요!',
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                        ),
+                        const SizedBox(height: 16),
+                        // 기분 선택
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[800],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _MoodSelector(emoji: '😄', isSelected: true),
+                              _MoodDivider(),
+                              _MoodSelector(emoji: '🙂', isSelected: false),
+                              _MoodDivider(),
+                              _MoodSelector(emoji: '😐', isSelected: false),
+                              _MoodDivider(),
+                              _MoodSelector(emoji: '😔', isSelected: false),
+                              _MoodDivider(),
+                              _MoodSelector(emoji: '😢', isSelected: false),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // 추천 카테고리
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[800],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              _RecommendationCategory(
+                                icon: Icons.celebration,
+                                iconColor: Colors.red,
+                                title: '기분 고조/에너지 충전 - 100-120 BPM',
+                                description: '활력 유지, 도파민 유지, 활동 유도',
+                              ),
+                              const SizedBox(height: 12),
+                              _RecommendationCategory(
+                                icon: Icons.wb_sunny,
+                                iconColor: Colors.orange,
+                                title: '미소 머금은 따뜻함 유지 - 80-95 BPM',
+                                description: '평온한 기쁨 유지, 정서 안정',
+                              ),
+                              const SizedBox(height: 12),
+                              _RecommendationCategory(
+                                icon: Icons.local_florist,
+                                iconColor: Colors.pink,
+                                title: '잔잔한 행복감 정착 - 70-80 BPM',
+                                description: '과잉 자극 없이 감정의 여운을 유지',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -245,73 +301,150 @@ class _HomeNavButton extends StatelessWidget {
   }
 }
 
-// 2x2 카드 위젯 추가
-class _HomeBigCard extends StatelessWidget {
-  final IconData? icon;
-  final String label;
-  final VoidCallback onTap;
-  final double? height;
-  final int? medicationRate;
-  const _HomeBigCard({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.height,
-    this.medicationRate,
-  });
+// 미션 카드 위젯
+class _MissionCard extends StatelessWidget {
+  final String missionText;
+  final bool isCompleted;
+
+  const _MissionCard({required this.missionText, required this.isCompleted});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey[850],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          // 왼쪽 세로 바
+          Container(
+            width: 4,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.grey[600],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // 원형 아이콘
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.grey[700],
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Text(
+                '약',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // 미션 텍스트
+          Expanded(
+            child: Text(
+              missionText,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
+          // 체크마크
+          Icon(Icons.check, color: Colors.green, size: 20),
+        ],
+      ),
+    );
+  }
+}
+
+// 기분 선택 위젯
+class _MoodSelector extends StatelessWidget {
+  final String emoji;
+  final bool isSelected;
+
+  const _MoodSelector({required this.emoji, required this.isSelected});
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        // TODO: 기분 선택 로직 구현
+      },
       child: Container(
-        height: height ?? 90,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.grey[850],
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected ? Colors.blue : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Stack(
-          children: [
-            // 배터리 효과 (복약률이 있을 때만)
-            if (medicationRate != null)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: (height ?? 90) * (medicationRate! / 100),
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 152, 205, 91),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
-                  ),
-                ),
-              ),
-            // 기존 콘텐츠
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  icon != null
-                      ? Icon(icon, color: Colors.white, size: 36)
-                      : const SizedBox.shrink(),
-                  const SizedBox(height: 10),
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ],
+        child: Text(
+          emoji,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white70,
+            fontSize: 18,
+          ),
         ),
       ),
+    );
+  }
+}
+
+// 기분 선택 구분선 위젯
+class _MoodDivider extends StatelessWidget {
+  const _MoodDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(width: 1, height: 20, color: Colors.white70);
+  }
+}
+
+// 추천 카테고리 위젯
+class _RecommendationCategory extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String description;
+
+  const _RecommendationCategory({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: iconColor, size: 24),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

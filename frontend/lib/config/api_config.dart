@@ -1,6 +1,6 @@
 class ApiConfig {
   // 개발 환경
-  static const String baseUrl = 'http://10.64.143.171:8000/api';
+  static const String baseUrl = 'http://10.10.180.93:8000/api';
 
   // 유저 API 엔드포인트
   static const String userCreate = '/user/create/';
@@ -11,7 +11,7 @@ class ApiConfig {
   static const String getChatSessions =
       '/chat/users/'; // GET: users/{user_id}/sessions/
   static const String postChatSession =
-      '/sessions/'; // POST: sessions/{user_id}/
+      '/chat/sessions/'; // POST: sessions/{user_id}/
 
   // 복약 관리 API 엔드포인트
   static const String medicineBase = '/medicine';

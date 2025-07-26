@@ -93,7 +93,12 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // 회원가입
-  Future<bool> signup(String email, String name, String password, DateTime birth) async {
+  Future<bool> signup(
+    String email,
+    String name,
+    String password,
+    DateTime birth,
+  ) async {
     _setLoading(true);
     _clearError();
 
