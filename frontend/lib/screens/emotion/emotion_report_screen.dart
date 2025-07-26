@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class EmotionReportScreen extends StatelessWidget {
-  final String finalResponse;
+  final List<String> finalResponse;
 
   const EmotionReportScreen({
     super.key,
@@ -37,16 +37,19 @@ class EmotionReportScreen extends StatelessWidget {
                         height: 120,
                       ),
                       const SizedBox(height: 32),
-                      Text(
-                        finalResponse,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                          height: 1.5,
+                      ...finalResponse.map((response) => Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Text(
+                          response,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                          ),
                         ),
-                      ),
+                      )).toList(),
                     ],
                   ),
                 ),

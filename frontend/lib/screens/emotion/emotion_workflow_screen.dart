@@ -206,13 +206,16 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         if (isFinalAnswer) {
           // WorkflowChatProvider 상태 초기화
           print('!!!!!!!!!!!!!!!!!!!!!!!!!resetState!!!!!!!!!!!!!!!!!!!!!!!');
+          print('DEBUG: About to reset WorkflowChatProvider state');
           context.read<WorkflowChatProvider>().resetState();
-          
+          print('DEBUG: WorkflowChatProvider state reset completed');
+          print(response);
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            print('DEBUG: Navigating to EmotionReportScreen');
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => EmotionReportScreen(
-                  finalResponse: response is List ? response[0] : response.toString(),
+                  finalResponse: response,
                 ),
               ),
             );
