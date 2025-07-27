@@ -11,15 +11,11 @@ class MedicineSerializer(serializers.ModelSerializer):
         ]
 
 class MusicSerializer(serializers.ModelSerializer):
-    audio_url = serializers.SerializerMethodField()
-    download_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Music
         fields = (
-            "id", "title", "report_id",
-            "bpm", "scale", "instruments", "music_genre", "mood_description", "description",
-            "audio_url", "download_url"
+            "id", "title", "medicine", "description", "audio",
         )
 
     # 스트리밍용 URL (DRF 기본 STATIC 서버 또는 S3 URL 등)

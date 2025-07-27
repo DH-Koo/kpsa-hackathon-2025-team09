@@ -340,9 +340,10 @@ class MedicinePostView(APIView):
         Music Genre: Acid Jazz, Afrobeat, Alternative Country, Baroque, Bengal Baul, Bhangra, Bluegrass, Blues Rock,  Chillout, Chiptune, Classic Rock, Contemporary R&B, Cumbia, Deep House, Disco Funk, Drum & Bass, Dubstep, EDM, Electro Swing, Funk Metal, G-funk, Garage Rock, Glitch Hop, Grime, Hyperpop, Indian Classical, Indie Electronic, Indie Folk, Indie Pop, Irish Folk, Jam Band, Jamaican Dub, Jazz Fusion, Latin Jazz, Lo-Fi Hip Hop, Marching Band, Merengue, New Jack Swing, Minimal Techno, Moombahton, Neo-Soul, Orchestral Score, Piano Ballad, Polka, Post-Punk, 60s Psychedelic Rock, Psytrance, R&B, Reggae, Reggaeton, Renaissance Music, Salsa, Shoegaze, Ska, Surf Rock, Synthpop, Techno, Trance, Trap Beat, Trip Hop, Vaporwave, Witch house, ...
         Mood/Description: Acoustic Instruments, Ambient, Bright Tones, Chill, Crunchy Distortion, Danceable, Dreamy, Echo, Emotional, Ethereal Ambience, Experimental, Fat Beats, Funky, Glitchy Effects, Huge Drop, Live Performance, Lo-fi, Ominous Drone, Psychedelic, Rich Orchestration, Saturated Tones, Subdued Melody, Sustained Chords, Swirling Phasers, Tight Groove, Unsettling, Upbeat, Virtuoso, Weird Noises, ...
         출력은 반드시 아래와 같은 JSON 형식의 리스트여야 하며, Python의 `json.loads()`로 파싱 가능해야 합니다. 
+        반드시 key와 value 값은 아래와 같은 형식이여야 합니다.
         [
             {{
-                "bpm": (bpm을 정수로 입력하세요. int()함수를 이용해 변환 가능한 값이여야 합니다. 예시: 120),
+                "bpm": (반드시 bpm을 정수로 입력하세요. int()함수를 이용해 변환 가능한 값이여야 합니다. 예시: 120),
                 "scale": (scale를 문자열로 입력하세요, 단 하나의 음계만 입력하세요),
                 "instruments": (instruments를 문자열로 입력하세요, 단 하나의 악기만 입력하세요),
                 "music_genre": (music genre를 문자열로 입력하세요, 단 하나의 장르만 입력하세요),
@@ -357,6 +358,7 @@ class MedicinePostView(APIView):
         해당 리스트만 출력해야 하며, 앞 뒤에 어떤 문자열도 포함하지 않아야 합니다. 즉 첫 문자열은 [로 시작하고, 마지막 문자열은 ]로 끝나야 합니다. 
         주의사항: 
         리스트에는 반드시 하나의 객체만의 포함되어야 합니다.
+        key값은 반드시 bpm, scale, instruments, music_genre, mood_description, description, title로 구성되어야 합니다.
             
         사용자의 최근 감정 리포트는 다음과 같습니다: """
         prompt += f"\n- {report.content} (ID: {report.id})"
@@ -398,6 +400,7 @@ class MedicinePostView(APIView):
         
         # 음악 생성
         music['bpm'] = int(music['bpm'])
+        description = music.get('description', '')
         # 음악 생성 함수 호출
         try:
             file_path = asyncio.run(music_generation(medicine_id, music, music_client))
@@ -409,7 +412,7 @@ class MedicinePostView(APIView):
             music_instance = Music.objects.create(
             medicine=medicine,
             title=music['title'],
-            report=report,
+            description=description,
             audio=django_file
         )
         return Response({
@@ -447,7 +450,7 @@ class MedicineMusicListView(APIView):
     def get(self, request, medicine_id, music_id=None):
         # ① 약 객체 가져오기 (권한 체크 포함)
         medicine = get_object_or_404(
-            Medicine.objects.prefetch_related("musics"),
+            Medicine,
             id=medicine_id,
         )
 
@@ -459,7 +462,6 @@ class MedicineMusicListView(APIView):
             # as_attachment=True 로 브라우저 자동 다운로드
             return FileResponse(
                 music.audio.open("rb"),
-                as_attachment=True,
                 filename=os.path.basename(music.audio.name),
                 content_type="audio/wav"
             )

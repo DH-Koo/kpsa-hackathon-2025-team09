@@ -21,8 +21,9 @@ class Music(models.Model):
     # 약 복용 시간에 맞춰 재생할 음악
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, related_name='musics')
     title = models.CharField(max_length=100)  # 음악 제목
-    report = models.ForeignKey(EmotionReport, on_delete=models.CASCADE, related_name='musics', null=True, blank=True)  # 기분 상태 보고서
+    description = models.TextField(blank=True, null=True)  # 음악 설명
     audio = models.FileField(upload_to='audio/', null=True, blank=True)  # 음악 파일
+
 
 class Mood(models.Model):
     # 사용자의 기분 상태
