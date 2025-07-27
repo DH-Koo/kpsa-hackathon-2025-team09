@@ -83,12 +83,15 @@ class MedicationRoutine {
       }
     }
 
-    // 필수 필드 검증
-    if (json['id'] == null) {
-      throw FormatException('id 필드가 null입니다');
+    // 필수 필드 검증 - 서버 응답 필드명에 맞게 수정
+    final id = json['id'] ?? json['medicine_id'];
+    if (id == null) {
+      throw FormatException('id 또는 medicine_id 필드가 null입니다');
     }
-    if (json['user_id'] == null) {
-      throw FormatException('user_id 필드가 null입니다');
+    // user_id 또는 user 필드 처리
+    final userId = json['user_id'] ?? json['user'];
+    if (userId == null) {
+      throw FormatException('user_id 또는 user 필드가 null입니다');
     }
     if (json['name'] == null) {
       throw FormatException('name 필드가 null입니다');
@@ -113,8 +116,8 @@ class MedicationRoutine {
     }
 
     return MedicationRoutine(
-      id: json['id'],
-      userId: json['user_id'],
+      id: id,
+      userId: userId,
       name: json['name'] ?? '',
       description: json['description'],
       takeTime: (json['take_time'] as List)

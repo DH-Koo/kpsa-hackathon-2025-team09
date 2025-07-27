@@ -19,7 +19,9 @@ class ApiConfig {
       '/medicine/medicine_of_day/$userId/$day/$weekday/';
   static const String medicineMusic = '/medicine/music/';
   static String medicineMusicList(int medicineId) =>
-      '/medicine/music/$medicineId/';
+      '/medicine/$medicineId/music/';
+  static String medicineMusicPlay(int medicineId, int musicId) =>
+      '/medicine/$medicineId/music/$musicId/';
   static const String medicineAI = '/medicine/ai/';
 
   // 헤더 설정

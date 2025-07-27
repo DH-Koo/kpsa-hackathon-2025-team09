@@ -52,6 +52,30 @@ class MedicationService {
 
       print('[createRoutine] 서버 응답: $data');
 
+      // 서버 응답이 성공 메시지와 medicine_id만 포함하는 경우 처리
+      if (data.containsKey('message') && data.containsKey('medicine_id')) {
+        print('[createRoutine] 성공 메시지 응답 감지, medicine_id: ${data['medicine_id']}');
+        
+        // 원본 routine에 서버에서 생성된 ID를 설정하여 반환
+        final createdRoutine = MedicationRoutine(
+          id: data['medicine_id'],
+          userId: routine.userId,
+          name: routine.name,
+          description: routine.description,
+          takeTime: routine.takeTime,
+          numPerTake: routine.numPerTake,
+          numPerDay: routine.numPerDay,
+          totalDays: routine.totalDays,
+          weekday: routine.weekday,
+          startDay: routine.startDay,
+          endDay: routine.endDay,
+        );
+        
+        print('[createRoutine] 생성된 루틴: ${createdRoutine.toJson()}');
+        return createdRoutine;
+      }
+
+      // 기존 방식: 전체 약 데이터가 반환되는 경우
       final createdRoutine = MedicationRoutine.fromJson(data);
       print('[createRoutine] 생성된 루틴: ${createdRoutine.toJson()}');
 

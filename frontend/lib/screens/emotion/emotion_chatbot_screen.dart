@@ -22,6 +22,63 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
     super.dispose();
   }
 
+  // 대화 새로고침 함수
+  void _refreshChat() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF232B34),
+          title: const Text(
+            '대화 새로고침',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            '현재 대화가 모두 삭제됩니다.\n새로운 대화를 시작하시겠습니까?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                '취소',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _performRefresh();
+              },
+              child: const Text(
+                '새로고침',
+                style: TextStyle(color: Color.fromARGB(255, 152, 205, 91)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 실제 새로고침 수행
+  void _performRefresh() {
+    final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.currentUser?.id ?? 0;
+    context.read<ChatProvider>().clearMessages();
+    
+    // 새로고침 완료 후 스크롤을 맨 위로 이동
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
   // **로 감싸진 텍스트를 볼드체로 변환하는 함수
   Widget _buildFormattedText(String text, TextStyle baseStyle) {
     final List<Widget> widgets = [];
@@ -78,6 +135,13 @@ class _EmotionChatbotScreenState extends State<EmotionChatbotScreen> {
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _refreshChat,
+            tooltip: '대화 새로고침',
+          ),
+        ],
       ),
       backgroundColor: const Color(0xFF181F26),
       body: SafeArea(

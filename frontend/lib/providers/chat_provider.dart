@@ -93,4 +93,13 @@ class ChatProvider extends ChangeNotifier {
     _currentSessionId = null;
     notifyListeners();
   }
+
+  // 대화 메시지 초기화 메서드
+  void clearMessages() {
+    _messages = [];
+    _hasUserSentMessage = false;
+    _currentSessionId = null;
+    _isLoading = false;
+    notifyListeners();
+  }
 }

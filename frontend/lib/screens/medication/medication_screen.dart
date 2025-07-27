@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/medication.dart';
+import '../../models/music.dart';
 import '../../service/medication_service.dart';
+import '../../service/api_service.dart';
 import '../../providers/medication_check_log_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'medication_day_card.dart';
@@ -10,6 +12,7 @@ import 'medication_routine_graph.dart';
 import 'package:intl/intl.dart';
 import 'medication_list_screen.dart';
 import 'medication_input_screen.dart';
+import 'widgets/music_card.dart';
 
 class MedicationScreen extends StatefulWidget {
   const MedicationScreen({super.key});
@@ -30,6 +33,10 @@ class _MedicationScreenState extends State<MedicationScreen> {
   // 각 루틴별, 각 시간별로 선택된 음악 카드 인덱스 (null이면 미선택, 기본 0)
   List<List<int?>> selectedMusicIndexList = [];
 
+  // 음악 리스트 관련 상태
+  Map<int, List<Music>> musicListMap = {}; // 약 ID별 음악 리스트
+  Map<int, bool> musicListExpandedMap = {}; // 약 ID별 음악 리스트 확장 상태
+
   Future<List<MedicationRoutine>>? routinesFuture;
   late PageController _pageController;
   late DateTime selectedDate;
@@ -45,6 +52,26 @@ class _MedicationScreenState extends State<MedicationScreen> {
     selectedDayIndex = now.weekday - 1;
     selectedDate = now;
     _pageController = PageController(initialPage: 1000);
+  }
+
+  // 데이터 새로고침 메서드 추가
+  void _refreshData(int userId) {
+    setState(() {
+      routinesFuture = null; // 캐시된 데이터 초기화
+    });
+    // 새로운 데이터 로드
+    routinesFuture = MedicationService().fetchRoutines(userId);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 화면이 포커스를 받을 때마다 데이터 새로고침
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currentUser = authProvider.currentUser;
+    if (currentUser != null && routinesFuture == null) {
+      routinesFuture = MedicationService().fetchRoutines(currentUser.id);
+    }
   }
 
   @override
@@ -402,12 +429,16 @@ class _MedicationScreenState extends State<MedicationScreen> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add, color: Colors.white),
-                  onPressed: () {
-                    Navigator.of(context).push(
+                  onPressed: () async {
+                    final result = await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MedicationInputScreen(),
                       ),
                     );
+                    // 약 추가 완료 후 화면 새로고침
+                    if (result == true) {
+                      _refreshData(userId);
+                    }
                   },
                 ),
                 IconButton(
@@ -651,8 +682,121 @@ class _MedicationScreenState extends State<MedicationScreen> {
 
                               return Column(
                                 children: routines.map((routine) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 8),
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.only(bottom: 8),
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade900,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                routine.name,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () async {
+                                                // 이미 음악 리스트가 로드되어 있고 확장된 상태라면 접기
+                                                if (musicListExpandedMap[routine.id] == true) {
+                                                  setState(() {
+                                                    musicListExpandedMap[routine.id] = false;
+                                                  });
+                                                  return;
+                                                }
+
+                                                // 음악 리스트가 아직 로드되지 않았다면 로드
+                                                if (!musicListMap.containsKey(routine.id)) {
+                                                  try {
+                                                    final musicListData = await ChatApiService.getMedicineMusicList(routine.id);
+                                                    final musicList = musicListData.map((data) => Music.fromJson(data)).toList();
+                                                    
+                                                    setState(() {
+                                                      musicListMap[routine.id] = musicList;
+                                                      musicListExpandedMap[routine.id] = true;
+                                                    });
+                                                  } catch (e) {
+                                                    print('약 음악 리스트 가져오기 실패: $e');
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text('음악 리스트를 가져오는데 실패했습니다.'),
+                                                        backgroundColor: Colors.red,
+                                                      ),
+                                                    );
+                                                  }
+                                                } else {
+                                                  // 이미 로드된 음악 리스트라면 확장 상태만 토글
+                                                  setState(() {
+                                                    musicListExpandedMap[routine.id] = true;
+                                                  });
+                                                }
+                                              },
+                                              child: Icon(
+                                                musicListExpandedMap[routine.id] == true
+                                                    ? Icons.keyboard_arrow_up
+                                                    : Icons.keyboard_arrow_down,
+                                                color: Colors.grey.shade400,
+                                                size: 24,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      // 음악 리스트 표시
+                                      if (musicListExpandedMap[routine.id] == true && musicListMap.containsKey(routine.id))
+                                        Container(
+                                          margin: const EdgeInsets.only(bottom: 8),
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Color(0xFF1A1A1A),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.music_note,
+                                                    color: const Color.fromARGB(255, 152, 205, 91),
+                                                    size: 16,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    '추천 음악',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 12),
+                                              ...musicListMap[routine.id]!.map((music) => MusicCard(
+                                                music: music,
+                                                medicineId: routine.id,
+                                                onPlay: () {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('${music.title} 재생 중...'),
+                                                      backgroundColor: const Color.fromARGB(255, 152, 205, 91),
+                                                    ),
+                                                  );
+                                                },
+                                              )).toList(),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
                                   );
                                 }).toList(),
                               );

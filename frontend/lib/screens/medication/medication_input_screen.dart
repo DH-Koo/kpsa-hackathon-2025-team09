@@ -28,6 +28,9 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
   List<List<int>> _selectedTimes = []; // [[9,0], [21,0]] 형태
   final List<String> _weekDays = ['월', '화', '수', '목', '금', '토', '일'];
 
+  // 로딩 상태 변수 추가
+  bool _isLoading = false;
+
   void _showCalendarBottomSheet({required bool isStartDate}) async {
     DateTime? picked = await showModalBottomSheet<DateTime>(
       context: context,
@@ -360,42 +363,72 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
         ),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        _buildMainQuestion(),
+                        const SizedBox(height: 40),
+                        _buildInputSection(
+                          '어떤 약인가요?',
+                          '약을 구분할 수 있는 이름을 적어주세요.',
+                          _medicationNameController,
+                        ),
+                        const SizedBox(height: 24),
+                        _buildInputSection(
+                          '얼마나 드시나요? (정)',
+                          '숫자로 입력해 주세요',
+                          _medicationAmountController,
+                        ),
+                        const SizedBox(height: 24),
+                        _buildTimeSelectionSection(),
+                        const SizedBox(height: 24),
+                        _buildWeekDaySelector(),
+                        const SizedBox(height: 24),
+                        _buildDateSelectionSection(),
+                      ],
+                    ),
+                  ),
+                ),
+                _buildNextButton(),
+              ],
+            ),
+          ),
+          // 로딩 오버레이
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.7),
+              child: Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 20),
-                    _buildMainQuestion(),
-                    const SizedBox(height: 40),
-                    _buildInputSection(
-                      '어떤 약인가요?',
-                      '약을 구분할 수 있는 이름을 적어주세요.',
-                      _medicationNameController,
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color.fromARGB(255, 152, 205, 91),
+                      ),
                     ),
-                    const SizedBox(height: 24),
-                    _buildInputSection(
-                      '얼마나 드시나요? (정)',
-                      '숫자로 입력해 주세요',
-                      _medicationAmountController,
+                    const SizedBox(height: 16),
+                    const Text(
+                      '음악을 생성하고 있습니다...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    const SizedBox(height: 24),
-                    _buildTimeSelectionSection(),
-                    const SizedBox(height: 24),
-                    _buildWeekDaySelector(),
-                    const SizedBox(height: 24),
-                    _buildDateSelectionSection(),
                   ],
                 ),
               ),
             ),
-            _buildNextButton(),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -776,6 +809,10 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
   }
 
   void _submitForm() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final medicationProvider = Provider.of<MedicationProvider>(
@@ -816,13 +853,19 @@ class _MedicationInputScreenState extends State<MedicationInputScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('약이 성공적으로 등록되었습니다.')));
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true); // 약 추가 완료를 나타내는 true 반환
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('약 등록에 실패했습니다: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }

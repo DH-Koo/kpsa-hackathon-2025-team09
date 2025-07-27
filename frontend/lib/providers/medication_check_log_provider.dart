@@ -13,35 +13,44 @@ class MedicationCheckLogProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 복약 체크/해제
-  Future<void> toggleCheck(int userId, String day, int medicineId) async {
-    // PUT 요청 실행
-    final updatedLog = await _service.toggleMedicineCheck(
-      userId,
-      day,
-      medicineId,
-    );
-
-    // PUT 응답을 사용하여 로컬 상태 업데이트
+  // 복약 체크/해제 (UI에서만 상태 변경)
+  Future<void> toggleCheck(int userId, String day, int medicineId, List<int> time) async {
+    // 해당 약의 특정 시간에 대한 체크 상태를 토글
     final existingIndex = checkLogs.indexWhere(
-      (log) =>
-          log.medicine == updatedLog.medicine &&
-          const ListEquality().equals(log.time, updatedLog.time),
+      (log) => log.medicine == medicineId && 
+                const ListEquality().equals(log.time, time),
     );
 
     if (existingIndex != -1) {
-      // 기존 로그 업데이트
+      // 기존 로그 토글
+      final existingLog = checkLogs[existingIndex];
+      final updatedLog = MedicationCheckLog(
+        id: existingLog.id,
+        user: existingLog.user,
+        medicine: existingLog.medicine,
+        date: existingLog.date,
+        time: existingLog.time,
+        isTaken: !existingLog.isTaken,
+      );
       checkLogs[existingIndex] = updatedLog;
     } else {
-      // 새 로그 추가
-      checkLogs.add(updatedLog);
+      // 새 로그 생성
+      final newLog = MedicationCheckLog(
+        id: DateTime.now().millisecondsSinceEpoch, // 임시 ID
+        user: userId,
+        medicine: medicineId,
+        date: day,
+        time: time,
+        isTaken: true,
+      );
+      checkLogs.add(newLog);
     }
 
     // UI 업데이트
     notifyListeners();
 
     print(
-      '[toggleCheck] PUT 응답으로 로컬 상태 업데이트 완료 - medicine: ${updatedLog.medicine}, isTaken: ${updatedLog.isTaken}',
+      '[toggleCheck] UI에서만 상태 변경 완료 - medicine: $medicineId, time: $time',
     );
   }
 

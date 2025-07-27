@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../../providers/emotion_report_provider.dart';
+import '../../models/emotion_report.dart';
 import 'emotion_bar_chart.dart';
 import 'emotion_line_chart.dart';
+import 'emotion_report_screen.dart';
+import '../report_screen.dart';
 
 class EmotionManageScreen extends StatefulWidget {
   const EmotionManageScreen({super.key});
@@ -242,39 +247,36 @@ class _EmotionManageScreenState extends State<EmotionManageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = '${_selectedDate.month}월 ${_selectedDate.day}일의 감정';
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: const Text('감정 관리', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+    return Consumer<EmotionReportProvider>(
+      builder: (context, reportProvider, child) {
+        final reports = reportProvider.getReportsByDate(_selectedDate);
+        
+        return Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            title: const Text('감정 관리', style: TextStyle(color: Colors.white)),
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                // 날짜 선택 섹션
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
                     children: [
                       GestureDetector(
                         onTap: _showCalendarBottomSheet,
                         child: Row(
                           children: [
                             Text(
-                              formattedDate,
+                              '${_selectedDate.month}월 ${_selectedDate.day}일의 감정',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -291,74 +293,172 @@ class _EmotionManageScreenState extends State<EmotionManageScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  EmotionBarChart(
-                    data: [
-                      BarChartEmotionData(
-                        label: '긍정성',
-                        value: 70,
-                        color: Colors.pinkAccent,
-                      ),
-                      BarChartEmotionData(
-                        label: '에너지',
-                        value: 50,
-                        color: Colors.amber,
-                      ),
-                      BarChartEmotionData(
-                        label: '스트레스',
-                        value: 30,
-                        color: Colors.lightBlueAccent,
-                      ),
-                      BarChartEmotionData(
-                        label: '통제력',
-                        value: 80,
-                        color: Colors.greenAccent,
-                      ),
-                    ],
-                    backgroundColor: Colors.white,
-                    summary: '일에 집중이 잘 되었고 평온한 하루였네요!',
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '최근 일주일간 감정 추이',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Pretendard',
+                ),
+                const SizedBox(height: 24),
+                // 리포트 카드들
+                if (reports.isNotEmpty) ...[
+                  ...reports.map((report) => _buildReportCard(report)).toList(),
+                ] else ...[
+                  // 리포트가 없을 때 표시할 메시지
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey[700]!),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.psychology_outlined,
+                          size: 64,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '이 날의 감정 리포트가 없습니다',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '감정 체크를 완료하면 여기에 리포트가 표시됩니다',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 8),
-                  EmotionLineChart(
-                    dates: List.generate(7, (index) {
-                      final date = DateTime.now().subtract(
-                        Duration(days: 6 - index),
-                      );
-                      return '${date.month}/${date.day}';
-                    }),
-                    valenceList: [60, 65, 70, 80, 75, 85, 70],
-                    arousalList: [40, 50, 55, 60, 65, 70, 50],
-                    stressList: [30, 35, 40, 38, 36, 32, 30],
-                    dominanceList: [70, 72, 74, 76, 78, 80, 70],
+                ],
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildReportCard(EmotionReport report) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: GestureDetector(
+        onTap: () => _navigateToReport(report),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: report.type == 'workflow' 
+                  ? Color.fromARGB(255, 152, 205, 91)
+                  : Colors.grey[700]!,
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    report.type == 'workflow' 
+                        ? Icons.psychology 
+                        : Icons.music_note,
+                    color: report.type == 'workflow' 
+                        ? Color.fromARGB(255, 152, 205, 91)
+                        : Colors.blue[300],
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          report.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${report.createdAt.hour.toString().padLeft(2, '0')}:${report.createdAt.minute.toString().padLeft(2, '0')}',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.grey[600],
+                    size: 16,
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: report.type == 'workflow' 
+                      ? Color.fromARGB(255, 152, 205, 91).withOpacity(0.2)
+                      : Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  report.type == 'workflow' ? '감정 워크플로우' : '음악 추천',
+                  style: TextStyle(
+                    color: report.type == 'workflow' 
+                        ? Color.fromARGB(255, 152, 205, 91)
+                        : Colors.blue[300],
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _navigateToReport(EmotionReport report) {
+    if (report.type == 'workflow') {
+      // 워크플로우 리포트로 이동
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => EmotionReportScreen(
+            finalResponse: report.responses,
+          ),
+        ),
+      );
+    } else {
+      // 음악 추천 리포트로 이동
+      final data = report.data;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => MusicRecommendationScreen(
+            valenceLevel: data['valenceLevel'] ?? 0,
+            arousalLevel: data['arousalLevel'] ?? 0,
+            stressLevel: data['stressLevel'] ?? 0,
+            dominanceLevel: data['dominanceLevel'] ?? 0,
+            responseText: report.responses.isNotEmpty ? report.responses[0] : '',
+          ),
+        ),
+      );
+    }
   }
 }

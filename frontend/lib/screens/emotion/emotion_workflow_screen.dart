@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/workflow_chat_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/emotion_report_provider.dart';
 import '../../models/chat_message.dart';
+import '../../models/emotion_report.dart';
 import 'dart:convert'; // Added for json.decode
 import 'emotion_report_screen.dart';
 
@@ -292,26 +294,42 @@ class _EmotionWorkFlowScreenState extends State<EmotionWorkFlowScreen> {
         final isFinalAnswer = responseData['is_final_answer'] ?? false;
 
         print('is_final_answer: $isFinalAnswer');
-        // is_final_answer가 true인 경우 WorkflowChatProvider 상태 초기화 후 EmotionReportScreen으로 이동
-        if (response[0] is List) {
-          // WorkflowChatProvider 상태 초기화
-          print('!!!!!!!!!!!!!!!!!!!!!!!!!resetState!!!!!!!!!!!!!!!!!!!!!!!');
-          print('DEBUG: About to reset WorkflowChatProvider state');
-          context.read<WorkflowChatProvider>().resetState();
-          print('DEBUG: WorkflowChatProvider state reset completed');
-          print(response);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            print('DEBUG: Navigating to EmotionReportScreen');
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => EmotionReportScreen(
-                  finalResponse: response[0] ,
-                ),
-              ),
+                  // is_final_answer가 true인 경우 WorkflowChatProvider 상태 초기화 후 EmotionReportScreen으로 이동
+          if (response[0] is List) {
+            // WorkflowChatProvider 상태 초기화
+            print('!!!!!!!!!!!!!!!!!!!!!!!!!resetState!!!!!!!!!!!!!!!!!!!!!!!');
+            print('DEBUG: About to reset WorkflowChatProvider state');
+            context.read<WorkflowChatProvider>().resetState();
+            print('DEBUG: WorkflowChatProvider state reset completed');
+            print(response);
+            
+            // 리포트 저장
+            final reportProvider = context.read<EmotionReportProvider>();
+            final report = EmotionReport(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              createdAt: DateTime.now(),
+              title: '${DateTime.now().month}월 ${DateTime.now().day}일의 감정 워크플로우 리포트',
+              type: 'workflow',
+              data: {
+                'sessionId': responseData['session_id'] ?? '',
+                'isFinalAnswer': isFinalAnswer,
+              },
+              responses: List<String>.from(response[0]),
             );
-          });
-          return [];
-        }
+            reportProvider.addReport(report);
+            
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              print('DEBUG: Navigating to EmotionReportScreen');
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => EmotionReportScreen(
+                    finalResponse: response[0] ,
+                  ),
+                ),
+              );
+            });
+            return [];
+          }
 
         // response가 리스트인 경우
         if (response is List) {

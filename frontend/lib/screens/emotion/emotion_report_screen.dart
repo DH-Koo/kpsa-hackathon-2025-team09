@@ -98,9 +98,9 @@ class EmotionReportScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
-                        'assets/images/character_icon.png',
-                        width: 120,
-                        height: 120,
+                        'assets/images/chatbot.png',
+                        width: 240,
+                        height: 240,
                       ),
                       const SizedBox(height: 32),
                       ...finalResponse.map((response) => Padding(

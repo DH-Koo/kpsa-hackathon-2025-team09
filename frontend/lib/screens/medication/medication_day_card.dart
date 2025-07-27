@@ -414,6 +414,7 @@ class _MedicationDayCardState extends State<MedicationDayCard> {
                                                                 widget.userId,
                                                                 selectedDateStr,
                                                                 routine.id,
+                                                                time,
                                                               );
                                                           // markNeedsBuild() 제거 - Consumer가 자동으로 업데이트
                                                         },

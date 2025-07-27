@@ -4,6 +4,9 @@ import '../report_screen.dart';
 import '../../service/api_service.dart';
 import '../../config/api_config.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/emotion_report_provider.dart';
+import '../../models/emotion_report.dart';
+import 'emotion_manage_screen.dart';
 
 class SimpleEmotionScreen extends StatefulWidget {
   const SimpleEmotionScreen({super.key});
@@ -452,6 +455,23 @@ class SimpleEmotionScreenState extends State<SimpleEmotionScreen>
                   ),
                 ),
               );
+              
+              // 리포트 저장
+              final reportProvider = context.read<EmotionReportProvider>();
+              final report = EmotionReport(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                createdAt: DateTime.now(),
+                title: '${DateTime.now().month}월 ${DateTime.now().day}일의 감정 리포트',
+                type: 'simple',
+                data: {
+                  'valenceLevel': _valenceLevel,
+                  'arousalLevel': _arousalLevel,
+                  'stressLevel': _stressLevel,
+                  'dominanceLevel': _dominanceLevel,
+                },
+                responses: [responseText],
+              );
+              reportProvider.addReport(report);
             } catch (e) {
               // 로딩 종료
               setState(() {

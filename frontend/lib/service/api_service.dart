@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import 'dart:typed_data'; // Added for Uint8List
 
 /// 백엔드 API와 통신하는 채팅 서비스 클래스
 class ChatApiService {
@@ -73,6 +74,11 @@ class ChatApiService {
   // GET 요청 헬퍼 (재시도 로직 제거)
   Future<T> get<T>(String endpoint) async {
     try {
+      print('=== GET 요청 ===');
+      print('Endpoint: ${ApiConfig.baseUrl}$endpoint');
+      print('Headers: $_headers');
+      print('====================');
+
       final response = await _getClient
           .get(Uri.parse('${ApiConfig.baseUrl}$endpoint'), headers: _headers)
           .timeout(ApiConfig.timeout);
@@ -142,6 +148,52 @@ class ChatApiService {
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
+    }
+  }
+
+  // 약 음악 리스트 가져오기
+  static Future<List<Map<String, dynamic>>> getMedicineMusicList(int medicineId) async {
+    try {
+      final response = await ChatApiService().get<List<dynamic>>(
+        ApiConfig.medicineMusicList(medicineId),
+      );
+      return response.map((item) => Map<String, dynamic>.from(item)).toList();
+    } catch (e) {
+      print('[ApiService] 약 음악 리스트 가져오기 실패: $e');
+      rethrow;
+    }
+  }
+
+  // 바이너리 데이터 GET 요청 (음악 파일 등)
+  Future<Uint8List> getBinary(String endpoint) async {
+    try {
+      print('=== GET Binary 요청 ===');
+      print('Endpoint: ${ApiConfig.baseUrl}$endpoint');
+      print('Headers: $_headers');
+      print('====================');
+
+      final response = await _getClient
+          .get(Uri.parse('${ApiConfig.baseUrl}$endpoint'), headers: _headers)
+          .timeout(ApiConfig.timeout);
+
+      _handleError(response);
+      return response.bodyBytes;
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
+    }
+  }
+
+  // 음악 재생 URL 가져오기 (바이너리 데이터로 처리)
+  static Future<Uint8List> getMusicBinary(int medicineId, int musicId) async {
+    try {
+      final response = await ChatApiService().getBinary(
+        ApiConfig.medicineMusicPlay(medicineId, musicId),
+      );
+      return response;
+    } catch (e) {
+      print('[ApiService] 음악 바이너리 가져오기 실패: $e');
+      rethrow;
     }
   }
 

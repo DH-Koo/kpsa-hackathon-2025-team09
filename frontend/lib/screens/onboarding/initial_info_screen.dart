@@ -196,7 +196,7 @@ class _InitialInfoScreenState extends State<InitialInfoScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            '몇 가지 질문으로, 00님에게\n딱 맞는 MindTune을 만들어드릴게요',
+            '몇 가지 질문으로, 치우님에게\n딱 맞는 MindTune을 만들어드릴게요',
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
